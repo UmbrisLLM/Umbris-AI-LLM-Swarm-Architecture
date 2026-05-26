@@ -1,0 +1,48 @@
+/*
+ * UMBRIS · typography utility classes.
+ *
+ * Four classes, one per role. Apply directly on any element.
+ * Requires the fonts to be loaded via @umbris/design/fonts.
+ *
+ *   .umbris-display   Albertus, uppercase, ritual letter-spacing
+ *   .umbris-serif     EB Garamond, italic-friendly body prose
+ *   .umbris-mono      Berkeley Mono · status, hashes, costs
+ *   .umbris-eyebrow   mono uppercase, ritual letter-spacing, stellar
+ */
+
+.umbris-display {
+  font-family: var(--font-albertus), Albertus, "Trajan Pro", serif;
+  font-weight: 500;
+  letter-spacing: var(--umbris-track-wider);
+  text-transform: uppercase;
+  line-height: var(--umbris-leading-tight);
+}
+
+.umbris-serif {
+  font-family: var(--font-eb-garamond), "EB Garamond", "Garamond", Georgia, serif;
+  line-height: var(--umbris-leading-relaxed);
+}
+
+.umbris-mono {
+  font-family: var(--font-berkeley-mono), "Berkeley Mono", "JetBrains Mono", ui-monospace, monospace;
+  letter-spacing: var(--umbris-track-wide);
+}
+
+.umbris-eyebrow {
+  font-family: var(--font-berkeley-mono), "Berkeley Mono", "JetBrains Mono", ui-monospace, monospace;
+  font-size: var(--umbris-type-eyebrow);
+  letter-spacing: var(--umbris-track-ritual);
+  text-transform: uppercase;
+  color: var(--umbris-stellar);
+}
+
+/* Drop cap · used in the manifesto's opening paragraph. */
+.umbris-dropcap::first-letter {
+  float: left;
+  font-family: var(--font-albertus), Albertus, serif;
+  font-size: 5.5rem;
+  line-height: 0.85;
+  margin: 0.35rem 0.6rem -0.25rem 0;
+  color: var(--umbris-violet);
+  font-weight: 700;
+}

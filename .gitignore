@@ -1,0 +1,46 @@
+# Node
+node_modules/
+npm-debug.log*
+*.tsbuildinfo
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.python-version
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+
+# Next.js
+.next/
+out/
+
+# Tauri
+target/
+**/src-tauri/target/
+**/src-tauri/gen/
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Logs + cache
+*.log
+logs/
+.umbris-cache/
+.umbris-custos/
+**/.umbris-custos/
+
+# Provenance + traces
+provenance/*.jsonl
+trace/*.jsonl
+
+# Secrets
+.env
+.env.*
+!.env.example

@@ -1,0 +1,15 @@
+{
+  "name": "umbris-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "UMBRIS · a hermetic-cosmic multi-agent LLM convocation. Ars Memoriae · De Umbris Idearum.",
+  "license": "MIT",
+  "workspaces": [
+    "packages/*",
+    "umbris-web",
+    "umbris-studio"
+  ],
+  "scripts": {
+    "format": "echo 'TODO · prettier'"
+  }
+}

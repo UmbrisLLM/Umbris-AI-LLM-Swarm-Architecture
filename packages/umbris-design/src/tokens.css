@@ -1,0 +1,76 @@
+/*
+ * UMBRIS · design tokens.
+ *
+ * Cosmic-occult palette. Pure void background, lunar pearl text,
+ * cosmic violet accents, and an eclipse-corona warm flash reserved
+ * for verified visions only.
+ *
+ * Sibling to OPUS's `opus-design/tokens.css`. Same structural slots,
+ * different register: violet instead of gold, lunar instead of bone,
+ * cooler greys throughout.
+ *
+ * De Umbris Idearum · ex umbris in lumen.
+ */
+
+:root {
+  /* ─── Palette ───────────────────────────────────────────────── */
+  --umbris-void:          #000000;
+  --umbris-lunar:         #DCDEE7;
+  --umbris-stellar:       #8B90A3;
+  --umbris-grey:          #4A4D5C;
+  --umbris-violet:        #9C7BD9;
+  --umbris-violet-faint:  rgba(156, 123, 217, 0.15);
+  --umbris-violet-glow:   rgba(156, 123, 217, 0.22);
+  --umbris-violet-deep:   rgba(156, 123, 217, 0.40);
+  --umbris-corona:        #FAE6B0;  /* RARE warm flash · verified visions only */
+  --umbris-corona-faint:  rgba(250, 230, 176, 0.12);
+  --umbris-error:         #B85C5C;  /* RESERVED · only for hard failures */
+
+  /* legacy aliases for cross-brand component reuse */
+  --opus-black:   var(--umbris-void);
+  --opus-bone:    var(--umbris-lunar);
+  --opus-silver:  var(--umbris-stellar);
+  --opus-dim:     var(--umbris-grey);
+  --opus-gold:    var(--umbris-violet);
+
+  /* ─── Spacing rhythm ────────────────────────────────────────── */
+  --umbris-space-xs:    4px;
+  --umbris-space-sm:    8px;
+  --umbris-space-md:    12px;
+  --umbris-space-lg:    20px;
+  --umbris-space-xl:    32px;
+  --umbris-space-xxl:   48px;
+
+  /* ─── Type scale ────────────────────────────────────────────── */
+  --umbris-type-eyebrow:  0.6875rem;
+  --umbris-type-micro:    0.75rem;
+  --umbris-type-small:    0.875rem;
+  --umbris-type-body:     1.0625rem;
+  --umbris-type-lead:     1.25rem;
+  --umbris-type-h3:       1.5rem;
+  --umbris-type-h2:       2rem;
+  --umbris-type-h1:       2.75rem;
+  --umbris-type-display:  5rem;
+
+  /* ─── Letter spacing ────────────────────────────────────────── */
+  --umbris-track-wide:    0.05em;
+  --umbris-track-wider:   0.18em;
+  --umbris-track-ritual:  0.25em;
+
+  /* ─── Line heights ──────────────────────────────────────────── */
+  --umbris-leading-tight:    1.05;
+  --umbris-leading-snug:     1.25;
+  --umbris-leading-relaxed:  1.55;
+
+  /* ─── Borders ───────────────────────────────────────────────── */
+  --umbris-border-inert:   rgba(74, 77, 92, 0.40);
+  --umbris-border-active:  rgba(156, 123, 217, 0.60);
+  --umbris-border-glow:    0 0 24px rgba(156, 123, 217, 0.18);
+
+  /* ─── Motion ────────────────────────────────────────────────── */
+  --umbris-ease:           cubic-bezier(0.22, 0.61, 0.36, 1);
+  --umbris-duration-fast:    150ms;
+  --umbris-duration-normal:  250ms;
+  --umbris-duration-slow:    400ms;
+  --umbris-duration-ritual:  800ms;
+}

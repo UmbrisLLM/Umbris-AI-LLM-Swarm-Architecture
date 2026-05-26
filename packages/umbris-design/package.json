@@ -1,0 +1,30 @@
+{
+  "name": "@umbris/design",
+  "version": "1.0.0",
+  "description": "Shared design tokens, fonts, utilities, planetary sigils, and chrome ornaments for UMBRIS web + studio. Single source of truth for the UMBRIS brand.",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./tokens.css": "./src/tokens.css",
+    "./utilities.css": "./src/utilities.css",
+    "./fonts": "./src/fonts.ts",
+    "./tailwind": "./src/tailwind.ts",
+    "./sigils": "./src/sigils.tsx",
+    "./chrome": "./src/chrome.tsx",
+    "./rail-icons": "./src/rail-icons.tsx"
+  },
+  "files": [
+    "src"
+  ],
+  "dependencies": {
+    "next": "^14.2.0"
+  },
+  "peerDependencies": {
+    "react": "^18 || ^19",
+    "tailwindcss": "^3.4.0 || ^4.0.0"
+  }
+}
