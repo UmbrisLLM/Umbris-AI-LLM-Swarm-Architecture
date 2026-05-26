@@ -1,0 +1,24 @@
+[package]
+name = "umbris-studio"
+version = "1.1.0"
+description = "UMBRIS Studio · the convocation, given form. Desktop HUD for the UMBRIS planetary convocation."
+authors = ["UMBRIS"]
+license = "MIT"
+edition = "2021"
+rust-version = "1.77"
+
+[lib]
+name = "umbris_studio_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-shell = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[features]
+custom-protocol = ["tauri/custom-protocol"]

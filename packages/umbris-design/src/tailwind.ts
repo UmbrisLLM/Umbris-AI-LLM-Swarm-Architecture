@@ -69,4 +69,4 @@ export const umbrisTheme = {
       "100%": { textShadow: "0 0 12px rgba(156,123,217,0.22)" },
     },
   },
-} as const;
+};

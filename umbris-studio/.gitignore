@@ -1,0 +1,27 @@
+# Next.js
+.next/
+out/
+
+# Tauri
+src-tauri/target/
+src-tauri/gen/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Editor / OS
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# Build artefacts
+*.tsbuildinfo
+next-env.d.ts.bak
+
+# Custos runtime state
+src-tauri/.umbris-custos/

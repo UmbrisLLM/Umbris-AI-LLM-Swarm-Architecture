@@ -1,0 +1,109 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import "@umbris/design/tokens.css";
+@import "@umbris/design/utilities.css";
+
+/* ──────────────────────────────────────────────────────────────── */
+/* Base                                                              */
+/* ──────────────────────────────────────────────────────────────── */
+
+html,
+body {
+  background-color: var(--umbris-void);
+  color: var(--umbris-lunar);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow: hidden; /* the HUD is a single fixed viewport, no scroll */
+}
+
+::selection {
+  background-color: var(--umbris-violet);
+  color: var(--umbris-void);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--umbris-grey);
+  border-radius: 4px;
+  opacity: 0.4;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--umbris-violet);
+}
+
+/* ──────────────────────────────────────────────────────────────── */
+/* UMBRIS Studio · panel framing helpers                            */
+/* ──────────────────────────────────────────────────────────────── */
+
+.umbris-panel {
+  border: 1px solid var(--umbris-border-inert);
+  background: rgba(20, 20, 20, 0.35);
+  border-radius: 2px;
+}
+
+.umbris-panel-active {
+  border: 1px solid var(--umbris-border-active);
+  background: rgba(20, 20, 20, 0.45);
+  box-shadow: var(--umbris-border-glow);
+}
+
+/* ──────────────────────────────────────────────────────────────── */
+/* Custom UMBRIS animations not in tailwind.ts                      */
+/* ──────────────────────────────────────────────────────────────── */
+
+@keyframes umbris-pulse-violet {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes umbris-ring-rotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes umbris-ring-rotate-reverse {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(-360deg); }
+}
+
+@keyframes umbris-star-twinkle {
+  0%, 100% { opacity: 0.15; }
+  50%      { opacity: 0.45; }
+}
+
+@keyframes umbris-corona-pulse {
+  0%, 100% { opacity: 0.45; }
+  50%      { opacity: 0.85; }
+}
+
+/* ──────────────────────────────────────────────────────────────── */
+/* Reduced motion · respect the user's preference                   */
+/* ──────────────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

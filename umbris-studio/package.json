@@ -1,13 +1,13 @@
 {
   "name": "umbris-studio",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
-  "description": "UMBRIS Studio · the desktop HUD for the convocation. Tauri + Next.js.",
-  "license": "MIT",
+  "description": "UMBRIS Studio · the convocation, given form. Desktop HUD for the UMBRIS planetary convocation.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "lint": "next lint",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build"
