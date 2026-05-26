@@ -104,9 +104,10 @@ export function SigilLuna({ size = 32, strokeWidth = 1.25, className }: SigilPro
   );
 }
 
-// ── ✦ CAELUM · the doer, the celestial sphere ──────────────────
-// A four-pointed star · the heavenly frame within which all motion occurs.
-export function SigilCaelum({ size = 32, strokeWidth = 1.25, className }: SigilProps) {
+// ── ✦ STELLA · the fixed star, the executor of the plan ───────
+// A four-pointed star · the eighth sphere in Brunonian cosmology · the
+// unchanging template against which the wandering planets are read.
+export function SigilStella({ size = 32, strokeWidth = 1.25, className }: SigilProps) {
   return (
     <svg {...baseProps(size, className, strokeWidth)}>
       <path d="M16 3 L19 13 L29 16 L19 19 L16 29 L13 19 L3 16 L13 13 Z" />
@@ -139,7 +140,7 @@ export const SIGIL_COMPONENTS: Record<
   IUPPITER:  SigilIuppiter,
   SATURNUS:  SigilSaturnus,
   LUNA:      SigilLuna,
-  CAELUM:    SigilCaelum,
+  STELLA:    SigilStella,
   UMBRA:     SigilUmbra,
 };
 
@@ -163,6 +164,6 @@ export const SIGIL_UNICODE: Record<AgentRole, string> = {
   IUPPITER:  "♃",
   SATURNUS:  "♄",
   LUNA:      "☽",
-  CAELUM:    "✦",
+  STELLA:    "✦",
   UMBRA:     "⬤",
 };

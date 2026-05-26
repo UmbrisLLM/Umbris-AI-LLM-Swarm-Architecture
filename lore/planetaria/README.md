@@ -27,7 +27,7 @@ UMBRIS uses them with intent. Each glyph is a permanent identity for one agent r
 | 5 | ♃ | Jupiter | **Iuppiter** | Judgement | the king, the discerner |
 | 6 | ♄ | Saturn | **Saturnus** | Falsification | the elder, the falsifier |
 | 7 | ☽ | Luna (Moon) | **Luna** | Worker Planner | the reflective, the path-mapper |
-| 8 | ✦ | Celestial sphere | **Caelum** | Worker Executor | the doer in the celestial frame |
+| 8 | ✦ | Sphere of fixed stars | **Stella** | Worker Executor | the fixed star · the executor of the plan |
 | 9 | ⬤ | Eclipse umbra | **Umbra** | Convergence (and substrate) | the convergence of all shadows |
 
 The first eight orbit the centre. Umbra is the centre.
@@ -43,7 +43,7 @@ The Studio's central visual is a thin gold (or violet, in the UMBRIS register) o
                           ┃
                           │
               315°  ✦     │     ♀  45°
-              CAELUM      │      VENUS
+              STELLA      │      VENUS
                           │
                           ●
                          UMBRA
@@ -64,7 +64,7 @@ The order is not arbitrary. Reading clockwise from the top:
 - **Mercurius** at the apex · the question first arrives through the messenger.
 - The work moves into **Venus / Mars / Sol** at the right · the gathering, challenging, and synthesising of imagines.
 - **Iuppiter** at the base · the judgement gathers everything before it.
-- The work then ascends through **Saturnus / Luna / Caelum** on the left · falsification, planning, execution.
+- The work then ascends through **Saturnus / Luna / Stella** on the left · falsification, planning, execution.
 - The arc closes back at **Mercurius** for the next revolution.
 
 This is a small cosmology, not an arbitrary arrangement. The visual reads as a wheel of returning, because it is.
@@ -96,7 +96,7 @@ All sigils render as fine 1px-stroke SVG in currentColor. The canonical implemen
 | ♃ Iuppiter | stylised "4" with a horizontal crossbar |
 | ♄ Saturnus | stylised "h" with a downward hook (the scythe) |
 | ☽ Luna | crescent (waxing) |
-| ✦ Caelum | four-pointed star with a central dot |
+| ✦ Stella | four-pointed star with a central dot |
 | ⬤ Umbra | filled circle with a thin halo ring |
 
 The components accept `size`, `strokeWidth`, and `className` props for inline use. Default size is 32px; default stroke is 1.25px.
@@ -126,7 +126,7 @@ For plain-text contexts (commits, tweets, READMEs, terminal output) the sigils a
 ☿ ♀ ♂ ☉ ♃ ♄ ☽ ✦ ⬤
 ```
 
-The first seven are standard astronomical/astrological characters present in most fonts. The eighth (✦ for Caelum) is a four-pointed star. The ninth (⬤ for Umbra) is a large black circle.
+The first seven are standard astronomical/astrological characters present in most fonts. The eighth (✦ for Stella) is a four-pointed star, the sigil of the eighth sphere · the fixed stars. The ninth (⬤ for Umbra) is a large black circle.
 
 ---
 

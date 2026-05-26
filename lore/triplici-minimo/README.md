@@ -11,6 +11,10 @@
 
 ---
 
+> **Status · v1.0** · This doctrine ships ahead of the engine. The convocation it describes is operational *in writing* · its public reasoning lives in [`lore/revolutions/`](../revolutions/). The Python convocation engine (`umbris-core`) and the autonomous Custos sentinel that runs it on a public cadence both arrive in v1.1. The lore is load-bearing because the engine is built against it · not the other way around.
+
+---
+
 ## In plain terms
 
 After UMBRIS had been deliberating, casting, verifying, and shipping for some time, a question was put to the convocation it had been quietly avoiding: *what is this all for?*

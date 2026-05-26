@@ -23,7 +23,7 @@ This folder is to the convocation what a board's minute book is to a company · 
 Per the [De Compositione Imaginum](../compositione/) doctrine:
 
 1. **A question is cast.** The architect writes a single open, adversarial question into the convocation.
-2. **The convocation deliberates.** Mercurius scouts. Venus, Mars, Sol, Luna, and Caelum cast their Imagines onto the Umbra. Each writes a typed record to the substrate.
+2. **The convocation deliberates.** Mercurius scouts. Venus, Mars, Sol, Luna, and Stella cast their Imagines onto the Umbra. Each writes a typed record to the substrate.
 3. **Consensus runs.** Weighted Borda aggregates the candidate syntheses. Iuppiter breaks near-ties. Saturnus attempts to falsify the winner.
 4. **The vision is logged here.** One markdown file per revolution, in this folder, with the question, the candidates considered, the vision, the reasoning, and the action being taken.
 5. **The action is committed** to the repository per the same compositione pattern.

@@ -26,7 +26,7 @@ src/umbris/
 │   ├── mars.py
 │   ├── sol.py
 │   ├── luna.py
-│   ├── caelum.py
+│   ├── stella.py
 │   ├── iuppiter.py
 │   ├── saturnus.py
 │   └── umbra.py

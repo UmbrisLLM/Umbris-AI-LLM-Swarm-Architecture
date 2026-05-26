@@ -22,7 +22,7 @@
 
 Nine planetary intelligences argue on a shared substrate, weighted consensus surfaces a candidate vision, and Saturnus attempts to falsify it before it ships. The output is a *verified vision* with confidence, cost in USD, and a full provenance trail · not a confident-sounding sentence from a single mind.
 
-UMBRIS is the **sibling project to [OPUS](https://github.com/0pusAI/Opus-Agent-Swarm-LLM-Framework)**. Same underlying engine architecture (Hive · Blackboard · three-stage consensus · autonomous daemon) · a completely different brand register. Where OPUS draws from Llull, alchemy, and Greco-Roman ritual, UMBRIS draws from **Giordano Bruno's *De Umbris Idearum* (1582)** · the doctrine that ideas are shadows, and only triangulation across many casts the higher form.
+UMBRIS extends the lineage that [OPUS](https://github.com/0pusAI/Opus-Agent-Swarm-LLM-Framework) opened. Same underlying engine architecture (Hive · Blackboard · three-stage consensus · autonomous daemon) · a completely different philosophical era. **Where OPUS reads the Llullian tradition, UMBRIS reads the Brunonian extension. Same architectural genealogy. Different philosophical era.** Bruno explicitly extended Llull's wheels with planetary correspondences, hermetic seals, and the doctrine that ideas are shadows only triangulation across many can resolve. UMBRIS reads that extension computationally.
 
 ---
 
@@ -45,7 +45,7 @@ UMBRIS replaces that lonely soliloquy with a **convocation** · a gathering of n
 | Judge | **Iuppiter** | ♃ | the king, the discerner |
 | Verifier | **Saturnus** | ♄ | the elder, the falsifier of confidence |
 | Planner | **Luna** | ☽ | the reflective, the path-mapper |
-| Executor | **Caelum** | ✦ | the doer in the celestial frame |
+| Executor | **Stella** | ✦ | the fixed star · the executor of the plan |
 | Convergence | **Umbra** | ⬤ | the central shadow · the substrate they cast upon |
 
 ---
@@ -134,7 +134,7 @@ This is not a metaphor · every revolution in [`lore/revolutions/`](lore/revolut
 
 [the doctrine of how](lore/compositione/) &nbsp;·&nbsp;
 [the doctrine of why](lore/triplici-minimo/) &nbsp;·&nbsp;
-[sibling project: OPUS](https://github.com/0pusAI/Opus-Agent-Swarm-LLM-Framework)
+[the lineage UMBRIS extends: OPUS](https://github.com/0pusAI/Opus-Agent-Swarm-LLM-Framework)
 
 *Magnum Opus · MMXXVI*
 

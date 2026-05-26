@@ -31,7 +31,7 @@ This document is the engineering reference for UMBRIS. It explains the substrate
 │   │  Mars        │                   │   event substrate    │       │
 │   │  Sol         │                   │                      │       │
 │   │  Luna        │                   │                      │       │
-│   │  Caelum      │                   │                      │       │
+│   │  Stella      │                   │                      │       │
 │   └──────────────┘                   │                      │       │
 │                                       │                      │       │
 │   ┌──────────────┐                   │                      │       │
@@ -105,7 +105,7 @@ class PlanetaryAgent(Protocol):
 | **Mars** (critic) | opus | 2 (sequential) | Venus's research | one `CRITIQUE` Imago per instance, attempting refutation |
 | **Sol** (synthesiser) | opus | 1 | all worker imagines | one `SYNTHESIS` Imago, the candidate vision |
 | **Luna** (planner) | opus | 1 (only when needed) | the synthesis | one `PLAN` Imago, only when the question requires staged execution |
-| **Caelum** (executor) | opus | 1 (only when needed) | the plan | one `EXECUTION` Imago per tool call, only when the planner specifies them |
+| **Stella** (executor) | opus | 1 (only when needed) | the plan | one `EXECUTION` Imago per tool call, only when the planner specifies them |
 | **Iuppiter** (judge) | opus | 1 | top-2 syntheses + all worker imagines | one `JUDGEMENT` Imago naming the winner with justification |
 | **Saturnus** (verifier) | opus | 1 per attempt | the chosen vision + worker imagines | one `FALSIFICATION` Imago either with a substantive flaw or with an `accepted: true` flag |
 | **Umbra** (convergence) | n/a | 1 | the verified vision | one `FINAL_VISION` Imago · the published response |
@@ -219,7 +219,7 @@ umbris/
 ├── umbris-core/            # the Python convocation engine
 │   ├── src/umbris/
 │   │   ├── agents/         # Mercurius, Venus, Mars, Sol, Luna,
-│   │   │                   # Caelum, Iuppiter, Saturnus, Umbra
+│   │   │                   # Stella, Iuppiter, Saturnus, Umbra
 │   │   ├── consensus.py    # weighted Borda + Iuppiter + Saturnus loop
 │   │   ├── umbra.py        # the substrate · InMemoryUmbra + FileUmbra
 │   │   ├── imago.py        # Imago + ImagoType dataclasses

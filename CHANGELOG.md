@@ -23,7 +23,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ## [1.0.0] — 2026-05-26 — *"Opening the Convocation"*
 
-> The founding commit. UMBRIS comes into existence as a sibling project to OPUS · same underlying engine architecture (Hive, Blackboard, three-stage consensus, autonomous sentinel), completely different brand register. Hermetic-cosmic Brunonian framing instead of alchemical Greco-Roman. The Eclipse instead of the Ouroboros. Cosmic violet instead of gold. Nine planetary agents instead of nine alchemical sigils.
+> Where OPUS reads the Llullian tradition, UMBRIS reads the Brunonian extension. Same architectural genealogy. Different philosophical era.
+>
+> The founding commit. UMBRIS comes into existence as the next chapter of the OPUS lineage · same underlying engine architecture (Hive, Blackboard, three-stage consensus, autonomous sentinel), completely different brand register. Hermetic-cosmic Brunonian framing instead of alchemical Greco-Roman. The Eclipse instead of the Ouroboros. Cosmic violet instead of gold. Nine planetary agents instead of nine alchemical sigils.
 
 ### Added · brand + lore
 

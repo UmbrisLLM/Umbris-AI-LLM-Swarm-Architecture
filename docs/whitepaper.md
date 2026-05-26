@@ -20,7 +20,7 @@ We present **UMBRIS**, a multi-agent LLM convocation that replaces single-voice 
 
 UMBRIS is a hermetic-cosmic descendant of three pre-existing systems: Bruno's *De Umbris Idearum* (1582) and the Lullian *Ars Magna* (c. 1305) for its conceptual framework, the Hearsay-II blackboard architecture (CMU, 1971–1976) for its substrate, and Grassé's stigmergy (1959) for its coordination principle. We claim no novelty in the underlying ideas. We claim novelty only in applying them, with discipline, to large language models.
 
-UMBRIS is a **sibling project** to OPUS. The two systems share the same engine architecture but differ in conceptual framework, brand register, and operational doctrine.
+UMBRIS extends a project that came before it: OPUS. **Where OPUS reads the Llullian tradition, UMBRIS reads the Brunonian extension. Same architectural genealogy. Different philosophical era.** The two systems share the same engine architecture but differ in conceptual framework, brand register, and operational doctrine.
 
 ---
 
@@ -62,7 +62,7 @@ UMBRIS organises nine LLM agents into three tiers around a shared substrate.
                    │   WORKER PLANETS    │
                    │  ♀ Venus     ♂ Mars  │
                    │  ☉ Sol       ☽ Luna  │
-                   │  ✦ Caelum            │
+                   │  ✦ Stella            │
                    └──────────┬──────────┘
                               │ casts Imagines
                               ▼
@@ -94,7 +94,7 @@ After Mercurius lands its Imagines, five worker planets engage:
 - **Mars** · the challenger · two instances act as critics, attempting to refute every claim Venus has gathered.
 - **Sol** · the central, the radiant · one instance acts as the synthesiser, weaving the surviving Venus-and-Mars output into a coherent candidate vision.
 - **Luna** · the reflective, the path-mapper · one instance acts as the planner where the question requires staged execution.
-- **Caelum** · the doer in the celestial frame · one instance executes any tool calls or external operations the planner specifies.
+- **Stella** · the fixed star · the eighth sphere · one instance executes any tool calls or external operations the planner specifies.
 
 Each writes typed Imagines onto the Umbra.
 
@@ -123,7 +123,7 @@ Every cast onto the Umbra is an **Imago**, a typed record with the following fie
 | Field | Type | Meaning |
 |---|---|---|
 | `id` | UUID | unique identifier for this Imago |
-| `agent` | AgentRole | one of `MERCURIUS / VENUS / MARS / SOL / IUPPITER / SATURNUS / LUNA / CAELUM / UMBRA` |
+| `agent` | AgentRole | one of `MERCURIUS / VENUS / MARS / SOL / IUPPITER / SATURNUS / LUNA / STELLA / UMBRA` |
 | `agent_id` | string | unique identifier of the specific agent instance (e.g. `mercurius_00`, `venus_01`) |
 | `type` | ImagoType | `SCOUT_OBSERVATION / RESEARCH / CRITIQUE / SYNTHESIS / JUDGEMENT / FALSIFICATION / PLAN / EXECUTION / FINAL_VISION` |
 | `content` | structured | the cast itself · text + optional structured payload |
@@ -143,7 +143,7 @@ Consensus in UMBRIS is not voting. It is structured falsification.
 
 ### 5.1 · Weighted Borda
 
-The synthesiser (Sol) and any direct judgement candidates produce a small set of candidate visions (typically 1–3). Each is scored by a weighted Borda aggregation: each worker (Venus, Mars, Sol, Luna, Caelum) ranks the candidates, and the Borda count is weighted by the agent's reported confidence.
+The synthesiser (Sol) and any direct judgement candidates produce a small set of candidate visions (typically 1–3). Each is scored by a weighted Borda aggregation: each worker (Venus, Mars, Sol, Luna, Stella) ranks the candidates, and the Borda count is weighted by the agent's reported confidence.
 
 This is a robust group-decision procedure. It cannot be gamed by a single high-confidence agent (because Borda counts position, not magnitude) and it cannot be gamed by a single low-confidence agent (because confidence is the weight). If the candidates are clearly ranked, the winner is unambiguous.
 
@@ -251,7 +251,7 @@ If you build on UMBRIS in research or production, please cite:
 }
 ```
 
-The work draws explicitly on its sibling project, OPUS · [`https://github.com/0pusAI/Opus-Agent-Swarm-LLM-Framework`](https://github.com/0pusAI/Opus-Agent-Swarm-LLM-Framework). The two systems share the same underlying engine. They differ in conceptual framework, brand register, and operational doctrine.
+The work draws explicitly on the project that came before it, OPUS · [`https://github.com/0pusAI/Opus-Agent-Swarm-LLM-Framework`](https://github.com/0pusAI/Opus-Agent-Swarm-LLM-Framework). Where OPUS reads the Llullian tradition, UMBRIS reads the Brunonian extension. The two systems share the same underlying engine and differ in conceptual framework, brand register, and operational doctrine.
 
 ---
 

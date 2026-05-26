@@ -17,7 +17,7 @@ interface NodeSpec {
 }
 
 // Layout: UMBRA at centre (ring 0). Inner ring (1): MERCURIUS, VENUS, MARS,
-// SOL, IUPPITER, SATURNUS. Outer ring (2): LUNA, CAELUM.
+// SOL, IUPPITER, SATURNUS. Outer ring (2): LUNA, STELLA.
 const NODES: NodeSpec[] = [
   { id: "umbra",     label: "Umbra",     role: "convergence",      desc: AGENT_DESCRIPTORS.UMBRA,     ring: 0, angleDeg: 0,   glyph: SIGIL_UNICODE.UMBRA },
   { id: "mercurius", label: "Mercurius", role: "the messenger",    desc: AGENT_DESCRIPTORS.MERCURIUS, ring: 1, angleDeg: 0,   glyph: SIGIL_UNICODE.MERCURIUS },
@@ -27,7 +27,7 @@ const NODES: NodeSpec[] = [
   { id: "iuppiter",  label: "Iuppiter",  role: "the discerner",    desc: AGENT_DESCRIPTORS.IUPPITER,  ring: 1, angleDeg: 240, glyph: SIGIL_UNICODE.IUPPITER },
   { id: "saturnus",  label: "Saturnus",  role: "the falsifier",    desc: AGENT_DESCRIPTORS.SATURNUS,  ring: 1, angleDeg: 300, glyph: SIGIL_UNICODE.SATURNUS },
   { id: "luna",      label: "Luna",      role: "the path-mapper",  desc: AGENT_DESCRIPTORS.LUNA,      ring: 2, angleDeg: 90,  glyph: SIGIL_UNICODE.LUNA },
-  { id: "caelum",    label: "Caelum",    role: "the doer",         desc: AGENT_DESCRIPTORS.CAELUM,    ring: 2, angleDeg: 270, glyph: SIGIL_UNICODE.CAELUM },
+  { id: "stella",    label: "Stella",    role: "the fixed star",   desc: AGENT_DESCRIPTORS.STELLA,    ring: 2, angleDeg: 270, glyph: SIGIL_UNICODE.STELLA },
 ];
 
 const RADIUS = { 0: 0, 1: 130, 2: 240 } as const;

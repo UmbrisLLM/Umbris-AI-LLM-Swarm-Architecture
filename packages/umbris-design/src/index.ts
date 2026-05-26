@@ -33,7 +33,7 @@ export const AGENT_ROLES = [
   "IUPPITER",    // ♃ · the king, the discerner
   "SATURNUS",    // ♄ · the elder, the falsifier
   "LUNA",        // ☽ · the reflective, the path-mapper
-  "CAELUM",      // ✦ · the doer in the celestial frame
+  "STELLA",      // ✦ · the fixed star, the executor of the plan
   "UMBRA",       // ⬤ · the convergence-point, the central shadow
 ] as const;
 
@@ -50,7 +50,7 @@ export const AGENT_DESCRIPTORS: Record<AgentRole, string> = {
   IUPPITER:  "the king, the discerner",
   SATURNUS:  "the elder, the falsifier",
   LUNA:      "the reflective, the path-mapper",
-  CAELUM:    "the doer in the celestial frame",
+  STELLA:    "the fixed star, the executor of the plan",
   UMBRA:     "the convergence of all shadows",
 };
 
@@ -67,13 +67,18 @@ export const UMBRIS_TO_OPUS_ROLE: Record<AgentRole, string> = {
   IUPPITER:  "JUDGE",
   SATURNUS:  "VERIFIER",
   LUNA:      "PLANNER",
-  CAELUM:    "EXECUTOR",
+  STELLA:    "EXECUTOR",
   UMBRA:     "HIVE",
 };
 
 /**
  * Eight planetary agents on the orbit ring (UMBRA is at the centre,
  * not on the orbit). 0° = top, clockwise.
+ *
+ * The seven traditional Renaissance planets (Mercurius / Venus / Mars
+ * / Sol / Iuppiter / Saturnus / Luna) plus Stella · the sphere of the
+ * fixed stars · the eighth heaven in Brunonian cosmology. UMBRA · the
+ * substrate · holds the centre and is not on the orbit.
  */
 export const ORB_AGENT_ORDER: readonly AgentRole[] = [
   "MERCURIUS",
@@ -83,7 +88,7 @@ export const ORB_AGENT_ORDER: readonly AgentRole[] = [
   "IUPPITER",
   "SATURNUS",
   "LUNA",
-  "CAELUM",
+  "STELLA",
 ] as const;
 
 /**
@@ -98,6 +103,6 @@ export const SIGIL_UNICODE: Record<AgentRole, string> = {
   IUPPITER:  "♃",
   SATURNUS:  "♄",
   LUNA:      "☽",
-  CAELUM:    "✦",
+  STELLA:    "✦",
   UMBRA:     "⬤",
 };

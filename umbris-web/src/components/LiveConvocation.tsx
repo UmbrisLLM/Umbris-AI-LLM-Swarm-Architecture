@@ -37,7 +37,7 @@ type AgentRole =
   | "sol"
   | "iuppiter"
   | "saturnus"
-  | "caelum";
+  | "stella";
 
 interface Agent {
   id: string;
@@ -75,9 +75,9 @@ const AGENTS: Agent[] = [
   { id: "iuppiter",  label: "Iuppiter",  role: "iuppiter",  ring: 1, angleDeg: 240, glyph: "♃" },
   { id: "saturnus",  label: "Saturnus",  role: "saturnus",  ring: 1, angleDeg: 300, glyph: "♄" },
 
-  // Outer ring · the path-mapper and the doer
+  // Outer ring · the path-mapper and the fixed-star executor
   { id: "luna",   label: "Luna",   role: "luna",   ring: 2, angleDeg: 90,  glyph: "☽" },
-  { id: "caelum", label: "Caelum", role: "caelum", ring: 2, angleDeg: 270, glyph: "✦" },
+  { id: "stella", label: "Stella", role: "stella", ring: 2, angleDeg: 270, glyph: "✦" },
 ];
 
 const RADIUS: Record<0 | 1 | 2, number> = { 0: 0, 1: 130, 2: 230 };
@@ -162,7 +162,7 @@ const ROLE_COLORS: Record<AgentRole, { node: string; glow: string; label: string
   sol:       { node: "#DCDEE7", glow: "rgba(220,222,231,0.55)", label: "text-umbris-lunar" },
   iuppiter:  { node: "#9C7BD9", glow: "rgba(156,123,217,0.45)", label: "text-umbris-violet" },
   saturnus:  { node: "#9C7BD9", glow: "rgba(156,123,217,0.45)", label: "text-umbris-violet" },
-  caelum:    { node: "#DCDEE7", glow: "rgba(220,222,231,0.45)", label: "text-umbris-lunar" },
+  stella:    { node: "#DCDEE7", glow: "rgba(220,222,231,0.45)", label: "text-umbris-lunar" },
 };
 
 // ──────────────────────────────────────────────────────────────────

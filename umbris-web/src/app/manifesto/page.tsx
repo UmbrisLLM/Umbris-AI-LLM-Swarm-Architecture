@@ -27,7 +27,7 @@ export default function ManifestoPage() {
           </p>
 
           <p>
-            We replace that lonely soliloquy with a structured convocation. Nine planetary intelligences (Mercurius at the perimeter, Venus and Mars and Sol and Luna and Caelum at the worker tier, Iuppiter and Saturnus at the seat of judgement, Umbra at the centre of all converging) coordinate not by speaking to each other but by casting typed Imagines onto a single shared substrate: the Umbra, an append-only event log. Each intelligence reads the current state of the Umbra, performs one unit of cognition, and casts its result back. No intelligence has a private channel to any other. The substrate is the conversation.
+            We replace that lonely soliloquy with a structured convocation. Nine planetary intelligences (Mercurius at the perimeter, Venus and Mars and Sol and Luna and Stella at the worker tier, Iuppiter and Saturnus at the seat of judgement, Umbra at the centre of all converging) coordinate not by speaking to each other but by casting typed Imagines onto a single shared substrate: the Umbra, an append-only event log. Each intelligence reads the current state of the Umbra, performs one unit of cognition, and casts its result back. No intelligence has a private channel to any other. The substrate is the conversation.
           </p>
 
           <p>

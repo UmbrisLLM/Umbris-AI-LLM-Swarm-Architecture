@@ -148,8 +148,9 @@ export function Compositione() {
               variants={fadeUp}
               className="umbris-serif italic text-umbris-violet text-lg md:text-xl pt-2"
             >
-              &ldquo;The Eclipse closes upon itself. The loop is sealed.
-              Nothing leaves that was not first verified within.&rdquo;
+              &ldquo;An eclipse is the moment one sphere admits another.
+              The convocation is the eclipse that never ends · each agent&rsquo;s shadow falls
+              on every other, and the vision is what survives the overlay.&rdquo;
             </motion.p>
 
             <motion.div variants={fadeUp} className="pt-6 flex flex-wrap gap-3">

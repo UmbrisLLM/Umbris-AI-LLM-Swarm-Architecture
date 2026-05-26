@@ -79,7 +79,7 @@ export const EPHEMERIS_ENTRIES: EphemerisEntry[] = [
   {
     date: "2026-05-19",
     headline: "Revolution IV · the nine planets",
-    body: "Settled the nine planetary roles. Mercurius and Luna scout. Venus gathers. Mars challenges. Sol synthesises. Iuppiter adjudicates. Saturnus falsifies. Caelum acts. Umbra holds the centre as substrate. Each role got a one-line descriptor, a glyph, and a system-prompt sketch. The architecture stopped feeling provisional.",
+    body: "Settled the nine planetary roles. Mercurius and Luna scout. Venus gathers. Mars challenges. Sol synthesises. Iuppiter adjudicates. Saturnus falsifies. Stella · the eighth sphere of the fixed stars · executes against the unchanging pattern. Umbra holds the centre as substrate. Each role got a one-line descriptor, a glyph, and a system-prompt sketch. The architecture stopped feeling provisional.",
     image: "/brand/profile.png",
   },
   {

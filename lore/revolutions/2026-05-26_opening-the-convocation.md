@@ -6,7 +6,7 @@
 
 ## Status
 
-✓ **Vision reached and committed.** UMBRIS now exists as a separate sibling project to OPUS, with its own brand register, its own doctrines, its own treasury, and its own scaling path.
+✓ **Vision reached and committed.** UMBRIS now exists as the Brunonian extension of the OPUS lineage. Where OPUS reads the Llullian tradition, UMBRIS reads the Brunonian extension · same architectural genealogy, different philosophical era. UMBRIS has its own brand register, its own doctrines, its own treasury, and its own scaling path.
 
 ---
 

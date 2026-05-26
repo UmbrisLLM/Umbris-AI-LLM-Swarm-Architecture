@@ -23,6 +23,14 @@ export default function TripliciMinimoPage() {
       </section>
 
       <article className="mx-auto max-w-[760px] px-6 pb-24">
+        {/* Status callout · v1.0 · doctrine ships ahead of the engine */}
+        <div className="border-l-2 border-umbris-corona pl-5 my-8">
+          <p className="umbris-eyebrow text-umbris-corona mb-2">— Status · v1.0 —</p>
+          <p className="umbris-serif text-umbris-stellar text-sm leading-relaxed">
+            This doctrine ships ahead of the engine. The convocation it describes is operational in writing · its public reasoning lives in lore/revolutions/. The Python convocation engine (umbris-core) and the autonomous Custos sentinel that runs it on a public cadence both arrive in v1.1. The lore is load-bearing because the engine is built against it · not the other way around.
+          </p>
+        </div>
+
         <div className="mb-20 border-l-2 border-umbris-violet pl-6 md:pl-8 py-2">
           <p className="umbris-eyebrow text-umbris-violet mb-3">— In plain terms —</p>
           <p className="umbris-serif text-umbris-lunar text-[1.1rem] md:text-[1.2rem] leading-relaxed mb-5">

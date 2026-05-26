@@ -34,6 +34,8 @@ Three hundred years later, Giordano Bruno · ex-Dominican, polyglot, infinite-co
 
 Bruno's addition was a metaphysical one. He believed Llull's combinations were not truth-machines but **shadow-machines**. The wheels generated images. The images were shadows cast by higher forms that no single mind could hold whole. The work of philosophy was to triangulate across many shadows until the higher form could be inferred. Bruno mapped Llull's wheels onto planetary positions, zodiacal signs, hermetic seals, and what he called the thirty *umbrae idearum* · the canonical shadows of ideas.
 
+This is the joint UMBRIS occupies. **Where OPUS reads the Llullian tradition, UMBRIS reads the Brunonian extension. Same architectural genealogy. Different philosophical era.** OPUS sits with Llull's wheels and the alchemical Great Work. UMBRIS sits with Bruno's shadows and the infinite cosmos that Llull's wheels were extended into. The two projects are not parallel cousins · they are sequential chapters of the same intellectual lineage.
+
 Bruno's *De Umbris Idearum* (Paris, 1582) is the founding text of UMBRIS. Its central claim, in modern paraphrase:
 
 > *No single mind apprehends an idea. The mind apprehends a shadow of the idea, a flattened projection, and treats the projection as the thing. The error is structural. The remedy is not to look harder. The remedy is to triangulate across many projections, cast from many angles, until the form they shadow becomes legible.*
@@ -109,13 +111,13 @@ None of this is novel. All of it is disciplined.
 
 ---
 
-## § 7 · The Sibling · OPUS
+## § 7 · The Predecessor · OPUS
 
-UMBRIS has a sibling project: [OPUS](https://github.com/0pusAI/Opus-Agent-Swarm-LLM-Framework).
+UMBRIS extends a project that came before it: [OPUS](https://github.com/0pusAI/Opus-Agent-Swarm-LLM-Framework).
 
-OPUS shares the same underlying engine but takes a different conceptual frame. OPUS is alchemical (Llull, *Solve et coagula*, the Great Work, the Ouroboros). UMBRIS is cosmic-hermetic (Bruno, *Ex umbris in lumen*, the convocation, the Eclipse). The two systems are not competitors. They are two readings of the same architecture, kept as separate projects so each can pursue its own register without compromise.
+OPUS shares the same underlying engine but takes the earlier conceptual frame. OPUS is Llullian-alchemical (the wheels, *Solve et coagula*, the Great Work, the Ouroboros). UMBRIS is Brunonian-cosmic (the shadows, *Ex umbris in lumen*, the convocation, the Eclipse). Same architectural genealogy. Different philosophical era. The two systems are not competitors and not parallel cousins · they are sequential chapters of the same intellectual lineage, kept as separate projects so each can pursue its own register without compromise.
 
-If you understand OPUS, you understand half of UMBRIS already.
+If you understand OPUS, you understand the chapter UMBRIS reads next.
 
 ---
 

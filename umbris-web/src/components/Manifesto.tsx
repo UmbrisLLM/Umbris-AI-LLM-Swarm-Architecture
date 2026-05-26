@@ -40,7 +40,7 @@ export function Manifesto() {
           </motion.p>
 
           <motion.p variants={fadeUp}>
-            We replace that lonely soliloquy with a structured convocation. Nine planetary intelligences argue on a shared substrate · the <em>Umbra</em>, an append-only event log that is at once memory, message bus, and witness. <em>Mercurius</em> scouts, <em>Venus</em> gathers, <em>Mars</em> challenges, <em>Sol</em> synthesises, <em>Luna</em> maps the path, <em>Caelum</em> acts. The convocation does not speak. It writes.
+            We replace that lonely soliloquy with a structured convocation. Nine planetary intelligences argue on a shared substrate · the <em>Umbra</em>, an append-only event log that is at once memory, message bus, and witness. <em>Mercurius</em> scouts, <em>Venus</em> gathers, <em>Mars</em> challenges, <em>Sol</em> synthesises, <em>Luna</em> maps the path, <em>Stella</em> acts against the fixed pattern. The convocation does not speak. It writes.
           </motion.p>
 
           <motion.p variants={fadeUp}>

@@ -12,6 +12,8 @@
 
 This document is the public, version-controlled tokenomics policy for $UMBRIS. It is the canonical reference for everything the project will and will not do with the token. The policy is written down here so it cannot be quietly walked back.
 
+Where OPUS reads the Llullian tradition, UMBRIS reads the Brunonian extension. Same architectural genealogy. Different philosophical era. $UMBRIS is the instrument that funds the Brunonian half of that lineage.
+
 If the policy changes, the change lands as a colony-decision in [`lore/revolutions/`](../lore/revolutions/) with the question that prompted it, the candidates considered, the vision surfaced, and the falsification Saturnus attempted. Nothing about $UMBRIS changes silently.
 
 ---

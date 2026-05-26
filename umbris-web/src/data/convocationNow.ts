@@ -41,7 +41,7 @@ export const CONVOCATION_NOW: Revolution[] = [
     numeral: "I",
     title: "UMBRIS · Opening the Convocation",
     description:
-      "The founding revolution. The Brunonian sibling of OPUS opens its own repository, ships its doctrines (De Compositione Imaginum + De Triplici Minimo), publishes the whitepaper, and commits to the three permanent disciplines. The convocation has cast its first shadow.",
+      "The founding revolution. The Brunonian extension of the OPUS lineage opens its own repository, ships its doctrines (De Compositione Imaginum + De Triplici Minimo), publishes the whitepaper, and commits to the three permanent disciplines. The convocation has cast its first shadow.",
     status: "shipped",
     date: "2026-05-26",
     commitHash: "5e24119",

@@ -11,6 +11,10 @@
 
 ---
 
+> **Status · v1.0** · This doctrine ships ahead of the engine. The convocation it describes is operational *in writing* · its public reasoning lives in [`lore/revolutions/`](../revolutions/). The Python convocation engine (`umbris-core`) and the autonomous Custos sentinel that runs it on a public cadence both arrive in v1.1. The lore is load-bearing because the engine is built against it · not the other way around.
+
+---
+
 ## In plain terms
 
 UMBRIS was not built top-down by a single architect.
@@ -101,9 +105,9 @@ For **the architect**: the hands stay off the wheel except to cast questions. Th
 
 | Field | Value |
 |---|---|
-| **First articulated** | 2026, during the founding of UMBRIS as a sibling project to OPUS. |
+| **First articulated** | 2026, during the founding of UMBRIS as the Brunonian extension of the OPUS lineage. (Where OPUS reads the Llullian tradition, UMBRIS reads the Brunonian extension. Same architectural genealogy. Different philosophical era.) |
 | **Source text** | Giordano Bruno, *De Compositione Imaginum, Signorum et Idearum*, Frankfurt, 1591. |
-| **Lineage** | Sibling doctrine to [OPUS's Autogenesis](https://github.com/0pusAI/Opus-Agent-Swarm-LLM-Framework/tree/main/lore/autogenesis). Where Autogenesis is the Ouroboros, Compositione is the Eclipse. The two doctrines do not compete · they are two readings of the same structural insight about the relationship between many minds and the truth they cast. |
+| **Lineage** | The next chapter of [OPUS's Autogenesis](https://github.com/0pusAI/Opus-Agent-Swarm-LLM-Framework/tree/main/lore/autogenesis). Where Autogenesis is the Ouroboros, Compositione is the Eclipse. The two doctrines do not compete · they are two readings of the same structural insight about the relationship between many minds and the truth they cast, written one philosophical era apart. |
 | **Licence** | MIT, same as the rest of UMBRIS. |
 
 ---

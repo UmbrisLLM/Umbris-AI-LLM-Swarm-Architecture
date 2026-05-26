@@ -6,7 +6,7 @@ The Next.js 14 site at **[tryumbris.com](https://tryumbris.com)**. Manifesto, do
 
 **v1.0.0 · scaffolded.** Full implementation lands in v1.1 by porting the OPUS website routes and re-skinning with the UMBRIS design package.
 
-For the v1.0 sibling implementation reference, see [`opus-web`](https://github.com/0pusAI/Opus-Agent-Swarm-LLM-Framework/tree/main/opus-web).
+For the v1.0 reference implementation, see [`opus-web`](https://github.com/0pusAI/Opus-Agent-Swarm-LLM-Framework/tree/main/opus-web) · OPUS is the Llullian stage. UMBRIS is the Brunonian extension. Same engine, different era.
 
 ## Routes (planned)
 
