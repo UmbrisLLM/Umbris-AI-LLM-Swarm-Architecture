@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import "@umbris/design/tokens.css";
+@import "@umbris/design/utilities.css";
+
+/* ──────────────────────────────────────────────────────────────── */
+/* Base                                                              */
+/* ──────────────────────────────────────────────────────────────── */
+
+html {
+  background-color: var(--umbris-void);
+  color: var(--umbris-lunar);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background-color: var(--umbris-void);
+  color: var(--umbris-lunar);
+  font-family: var(--font-eb-garamond), Georgia, serif;
+  overflow-x: hidden;
+}
+
+::selection {
+  background-color: var(--umbris-violet);
+  color: var(--umbris-void);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--umbris-grey);
+  border-radius: 4px;
+  opacity: 0.4;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--umbris-violet);
+}
+
+/* ──────────────────────────────────────────────────────────────── */
+/* Star field background · used on the homepage hero                */
+/* ──────────────────────────────────────────────────────────────── */
+
+.umbris-stars::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, rgba(220, 222, 231, 0.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 60% 70%, rgba(220, 222, 231, 0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 35% 80%, rgba(220, 222, 231, 0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 80% 20%, rgba(220, 222, 231, 0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 50% 50%, rgba(220, 222, 231, 0.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 90% 85%, rgba(220, 222, 231, 0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 10% 60%, rgba(220, 222, 231, 0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 70% 40%, rgba(220, 222, 231, 0.3) 0%, transparent 100%);
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  pointer-events: none;
+}
+
+/* ──────────────────────────────────────────────────────────────── */
+/* Reduced motion                                                    */
+/* ──────────────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

@@ -85,3 +85,19 @@ export const ORB_AGENT_ORDER: readonly AgentRole[] = [
   "LUNA",
   "CAELUM",
 ] as const;
+
+/**
+ * Unicode planetary glyphs for each agent role. Used as inline text
+ * sigils where rendering an SVG would be heavier than needed.
+ */
+export const SIGIL_UNICODE: Record<AgentRole, string> = {
+  MERCURIUS: "☿",
+  VENUS:     "♀",
+  MARS:      "♂",
+  SOL:       "☉",
+  IUPPITER:  "♃",
+  SATURNUS:  "♄",
+  LUNA:      "☽",
+  CAELUM:    "✦",
+  UMBRA:     "⬤",
+};
