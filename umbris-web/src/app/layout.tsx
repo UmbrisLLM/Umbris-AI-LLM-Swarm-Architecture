@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { umbrisFonts } from "@umbris/design/fonts";
 import { Nav } from "@/components/Nav";
+import { SmoothScroll } from "@/components/SmoothScroll";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -20,6 +21,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={umbrisFonts}>
       <body className="bg-umbris-void text-umbris-lunar font-serif">
+        <SmoothScroll />
         <Nav />
         {children}
       </body>
