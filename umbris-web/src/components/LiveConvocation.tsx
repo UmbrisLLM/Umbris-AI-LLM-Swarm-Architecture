@@ -11,10 +11,39 @@
  * No backend calls. Pure client-side animation + curated records.
  */
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import dynamic from "next/dynamic";
 import clsx from "clsx";
 import { Divider } from "./ui/Divider";
+import { CastingInput } from "./CastingInput";
+import type { AgentRole } from "@umbris/design";
+
+// The 3D planetary system is heavy (R3F + bloom). Load client-only.
+const PlanetarySystem3D = dynamic(
+  () => import("./PlanetarySystem3D").then((m) => m.PlanetarySystem3D),
+  { ssr: false, loading: () => <div style={{ height: 520 }} /> },
+);
+
+// Map the lowercase agentId used in the scripted demo to the uppercase
+// AgentRole enum used by PlanetarySystem3D. UMBRA isn't on the orbit so
+// it never enters the active/completed sets.
+function toAgentRole(id: string): AgentRole | null {
+  const upper = id.toUpperCase();
+  if (
+    upper === "MERCURIUS" ||
+    upper === "VENUS" ||
+    upper === "MARS" ||
+    upper === "SOL" ||
+    upper === "IUPPITER" ||
+    upper === "SATURNUS" ||
+    upper === "LUNA" ||
+    upper === "STELLA"
+  ) {
+    return upper as AgentRole;
+  }
+  return null;
+}
 
 // ──────────────────────────────────────────────────────────────────
 // Types
@@ -334,77 +363,36 @@ export function LiveConvocation({ embedded = false }: { embedded?: boolean } = {
           </>
         )}
 
-        {/* Input + action */}
-        <div className="mb-8 flex flex-col gap-3">
-          <label className="umbris-eyebrow text-umbris-stellar">
-            Pose the convocation a question
-          </label>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <input
-              type="text"
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
-              disabled={isRunning}
-              className="flex-1 px-4 py-3 bg-umbris-void border border-umbris-grey/60 text-umbris-lunar umbris-serif text-base focus:outline-none focus:border-umbris-lunar disabled:opacity-50"
-              placeholder="What is the question worth deliberating?"
-              aria-label="Question for the convocation"
-            />
+        {/* Input · the casting altar */}
+        <div className="mb-8">
+          <CastingInput
+            value={question}
+            onChange={setQuestion}
+            onSubmit={isRunning ? () => {} : begin}
+            disabled={isRunning}
+            loading={isRunning}
+            placeholder="What is the question worth deliberating?"
+            buttonLabel="Cast"
+          />
+          {phase === "complete" && (
             <button
               type="button"
-              onClick={isRunning ? undefined : begin}
-              disabled={isRunning}
-              className={clsx(
-                "px-6 py-3 umbris-mono text-xs uppercase tracking-widest border transition-all duration-300",
-                isRunning
-                  ? "border-umbris-grey text-umbris-grey cursor-wait"
-                  : "border-umbris-violet text-umbris-violet hover:bg-umbris-violet hover:text-umbris-void"
-              )}
+              onClick={reset}
+              className="mt-3 umbris-mono text-[10px] uppercase tracking-widest text-umbris-stellar hover:text-umbris-lunar transition-colors"
             >
-              {isRunning ? "Deliberating…" : "Begin Deliberation"}
+              · reset the altar ·
             </button>
-            {phase === "complete" && (
-              <button
-                type="button"
-                onClick={reset}
-                className="px-4 py-3 umbris-mono text-xs uppercase tracking-widest border border-umbris-grey text-umbris-stellar hover:border-umbris-lunar hover:text-umbris-lunar transition-all duration-300"
-              >
-                Reset
-              </button>
-            )}
-          </div>
+          )}
         </div>
 
-        {/* Convocation graph */}
-        <div className="relative w-full aspect-[16/10] border border-umbris-grey/40 overflow-hidden bg-umbris-void mb-6">
-          <ConvocationGraph
-            activeAgents={activeAgents}
-            completedAgents={completedAgents}
-            phase={phase}
-          />
-
-          {/* HUD overlay */}
-          <div className="absolute top-4 left-4 right-4 flex items-start justify-between pointer-events-none">
-            <div>
-              <div className="umbris-eyebrow text-umbris-violet mb-1">
-                {phase === "idle" && "· convocation at rest ·"}
-                {phase === "scouting" && "· mercurius and luna scouting ·"}
-                {phase === "gathering" && "· venus gathering harmony ·"}
-                {phase === "challenging" && "· mars circling ·"}
-                {phase === "synthesising" && "· sol fusing ·"}
-                {phase === "verifying" && "· iuppiter and saturnus weighing ·"}
-                {phase === "complete" && "· vision accepted ·"}
-              </div>
-            </div>
-            <div className="text-right">
-              <div className="umbris-mono text-umbris-stellar text-xs">
-                {timeStamp(elapsedSec)}
-              </div>
-              <div className="umbris-mono text-umbris-violet text-sm font-medium">
-                ${costUsd.toFixed(4)}
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* Convocation · the 3D galactic system */}
+        <ConvocationSystemFrame
+          activeAgents={activeAgents}
+          completedAgents={completedAgents}
+          phase={phase}
+          elapsedSec={elapsedSec}
+          costUsd={costUsd}
+        />
 
         {/* Transcript */}
         <div className="border border-umbris-grey/40 bg-umbris-void/80 p-6 font-mono text-sm mb-6">
@@ -500,153 +488,116 @@ export function LiveConvocation({ embedded = false }: { embedded?: boolean } = {
 // ConvocationGraph · SVG visualisation of the planetary convocation
 // ──────────────────────────────────────────────────────────────────
 
-interface ConvocationGraphProps {
+interface ConvocationSystemFrameProps {
   activeAgents: Set<string>;
   completedAgents: Set<string>;
   phase: Phase;
+  elapsedSec: number;
+  costUsd: number;
 }
 
-function ConvocationGraph({ activeAgents, completedAgents, phase }: ConvocationGraphProps) {
-  const umbra = AGENTS.find((a) => a.id === "umbra")!;
-  const umbraPos = nodePos(umbra);
-  const others = AGENTS.filter((a) => a.id !== "umbra");
+/**
+ * The 3D planetary system wrapped in the UMBRIS instrument-panel
+ * chrome · corner brackets, phase indicator on the upper-left, the
+ * elapsed clock + running cost on the upper-right.
+ */
+function ConvocationSystemFrame({
+  activeAgents,
+  completedAgents,
+  phase,
+  elapsedSec,
+  costUsd,
+}: ConvocationSystemFrameProps) {
+  const active = useMemo(() => {
+    const out = new Set<AgentRole>();
+    activeAgents.forEach((id) => {
+      const r = toAgentRole(id);
+      if (r) out.add(r);
+    });
+    return out;
+  }, [activeAgents]);
+
+  const completed = useMemo(() => {
+    const out = new Set<AgentRole>();
+    completedAgents.forEach((id) => {
+      const r = toAgentRole(id);
+      if (r) out.add(r);
+    });
+    return out;
+  }, [completedAgents]);
 
   return (
-    <svg
-      viewBox={`0 0 ${SVG_SIZE} ${SVG_SIZE}`}
-      className="absolute inset-0 w-full h-full"
-      role="img"
-      aria-label="Convocation topology · Umbra at centre, six inner planets, two outer planets"
-    >
-      {/* Concentric ring guides */}
-      <circle cx={CENTER} cy={CENTER} r={RADIUS[1]} fill="none" stroke="#4A4D5C" strokeWidth="0.4" strokeDasharray="2 5" opacity={0.5} />
-      <circle cx={CENTER} cy={CENTER} r={RADIUS[2]} fill="none" stroke="#4A4D5C" strokeWidth="0.4" strokeDasharray="2 5" opacity={0.5} />
+    <div className="relative w-full mb-6">
+      {/* Corner brackets · the instrument frame */}
+      <CornerBrackets />
 
-      {/* Connections */}
-      {others.map((a) => {
-        const p = nodePos(a);
-        const isActive = activeAgents.has(a.id);
-        const isCompleted = completedAgents.has(a.id);
-        return (
-          <g key={`line-${a.id}`}>
-            <line
-              x1={umbraPos.x}
-              y1={umbraPos.y}
-              x2={p.x}
-              y2={p.y}
-              stroke={isActive ? "#9C7BD9" : isCompleted ? "#DCDEE7" : "#4A4D5C"}
-              strokeWidth={isActive ? 1.4 : isCompleted ? 0.6 : 0.4}
-              opacity={isActive ? 1 : isCompleted ? 0.6 : 0.3}
-            />
-            {isActive && (
-              <PulseAlongLine x1={umbraPos.x} y1={umbraPos.y} x2={p.x} y2={p.y} />
-            )}
-          </g>
-        );
-      })}
+      <PlanetarySystem3D
+        activeAgents={active}
+        completedAgents={completed}
+        height={560}
+        interactive={false}
+        emptyPrompt="press cast to wake the convocation"
+      />
 
-      {/* Nodes */}
-      {AGENTS.map((a) => {
-        const p = nodePos(a);
-        const colors = ROLE_COLORS[a.role];
-        const isActive = activeAgents.has(a.id);
-        const isCompleted = completedAgents.has(a.id);
-        const isUmbra = a.role === "umbra";
-        const baseRadius = isUmbra ? 18 : a.ring === 2 ? 8 : 10;
-
-        return (
-          <g key={a.id}>
-            {/* Halo (animated when active) */}
-            {(isActive || isUmbra) && (
-              <motion.circle
-                cx={p.x}
-                cy={p.y}
-                r={baseRadius + 8}
-                fill={colors.glow}
-                animate={{
-                  r: isActive ? [baseRadius + 6, baseRadius + 16, baseRadius + 6] : baseRadius + 6,
-                  opacity: isActive ? [0.4, 0.8, 0.4] : isUmbra ? [0.3, 0.5, 0.3] : 0,
-                }}
-                transition={{
-                  duration: isUmbra ? 1.2 : 1.4,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              />
-            )}
-            {/* Core node */}
-            <circle
-              cx={p.x}
-              cy={p.y}
-              r={baseRadius}
-              fill={isActive || isUmbra || isCompleted ? colors.node : "#000"}
-              stroke={colors.node}
-              strokeWidth={isActive ? 2 : 1}
-              opacity={isActive || isUmbra ? 1 : isCompleted ? 0.95 : 0.55}
-            />
-            {/* Inner mark for Umbra */}
-            {isUmbra && (
-              <circle cx={p.x} cy={p.y} r={baseRadius / 3} fill="#000" opacity={0.7} />
-            )}
-            {/* Glyph */}
-            <text
-              x={p.x}
-              y={p.y + (isUmbra ? 0 : 3)}
-              textAnchor="middle"
-              dominantBaseline="middle"
-              fontSize={isUmbra ? "13" : "10"}
-              fill={isUmbra ? "#000" : (isActive || isCompleted ? "#000" : "#4A4D5C")}
-              style={{ pointerEvents: "none" }}
-            >
-              {a.glyph}
-            </text>
-            {/* Label */}
-            <text
-              x={p.x}
-              y={p.y + baseRadius + 14}
-              textAnchor="middle"
-              fontSize="9"
-              fill={isActive ? "#9C7BD9" : isCompleted ? "#DCDEE7" : "#4A4D5C"}
-              opacity={isActive || isCompleted || isUmbra ? 1 : 0.5}
-              fontFamily="var(--font-berkeley-mono), monospace"
-              style={{ letterSpacing: "0.08em", textTransform: "uppercase" }}
-            >
-              {a.label}
-            </text>
-          </g>
-        );
-      })}
-
-      {/* Saturnus falsification flash */}
-      {phase === "verifying" && (
-        <motion.circle
-          cx={CENTER}
-          cy={CENTER}
-          r={RADIUS[1] + 30}
-          fill="none"
-          stroke="#9C7BD9"
-          strokeWidth={2}
-          initial={{ opacity: 0, scale: 0.6 }}
-          animate={{ opacity: [0, 0.5, 0], scale: [0.6, 1.05, 1.2] }}
-          transition={{ duration: 1.6, repeat: Infinity, ease: "easeOut" }}
-        />
-      )}
-    </svg>
+      {/* HUD overlay · phase label + clock/cost */}
+      <div className="pointer-events-none absolute top-5 left-5 right-5 flex items-start justify-between z-20">
+        <div>
+          <div className="umbris-eyebrow text-umbris-violet text-[10px] tracking-[0.18em]">
+            {phase === "idle" && "· convocation at rest ·"}
+            {phase === "scouting" && "· mercurius and luna scouting ·"}
+            {phase === "gathering" && "· venus gathering harmony ·"}
+            {phase === "challenging" && "· mars circling ·"}
+            {phase === "synthesising" && "· sol fusing ·"}
+            {phase === "verifying" && "· iuppiter and saturnus weighing ·"}
+            {phase === "complete" && "· vision accepted ·"}
+          </div>
+        </div>
+        <div className="text-right">
+          <div className="umbris-mono text-umbris-stellar text-xs tabular-nums">
+            {timeStamp(elapsedSec)}
+          </div>
+          <div className="umbris-mono text-umbris-violet text-sm font-medium tabular-nums">
+            ${costUsd.toFixed(4)}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
-function PulseAlongLine({ x1, y1, x2, y2 }: { x1: number; y1: number; x2: number; y2: number }) {
+/**
+ * Four corner brackets · thin violet hairlines that frame the 3D
+ * scene as an instrument, not a card.
+ */
+function CornerBrackets() {
+  const armStyle: React.CSSProperties = {
+    position: "absolute",
+    width: 28,
+    height: 1,
+    backgroundColor: "var(--umbris-violet)",
+    opacity: 0.7,
+    pointerEvents: "none",
+    zIndex: 25,
+  };
+  const stemStyle: React.CSSProperties = {
+    position: "absolute",
+    width: 1,
+    height: 28,
+    backgroundColor: "var(--umbris-violet)",
+    opacity: 0.7,
+    pointerEvents: "none",
+    zIndex: 25,
+  };
   return (
-    <motion.circle
-      r={2.8}
-      fill="#9C7BD9"
-      initial={{ cx: x2, cy: y2, opacity: 0 }}
-      animate={{ cx: x1, cy: y1, opacity: [0, 1, 0] }}
-      transition={{
-        duration: 1.8,
-        repeat: Infinity,
-        ease: "easeInOut",
-      }}
-    />
+    <>
+      <span style={{ ...armStyle, top: 0, left: 0 }} />
+      <span style={{ ...stemStyle, top: 0, left: 0 }} />
+      <span style={{ ...armStyle, top: 0, right: 0 }} />
+      <span style={{ ...stemStyle, top: 0, right: 0 }} />
+      <span style={{ ...armStyle, bottom: 0, left: 0 }} />
+      <span style={{ ...stemStyle, bottom: 0, left: 0 }} />
+      <span style={{ ...armStyle, bottom: 0, right: 0 }} />
+      <span style={{ ...stemStyle, bottom: 0, right: 0 }} />
+    </>
   );
 }
