@@ -1,25 +1,59 @@
-"""
-umbris · a hermetic-cosmic multi-agent LLM convocation for collective reasoning.
+"""UMBRIS · Ars Memoriae. A hermetic-cosmic multi-agent LLM convocation for collective reasoning.
 
-The public API surface for the UMBRIS engine. The reference orchestration
-inherits the OPUS engine semantics with planetary role-name substitution.
-The full standalone implementation lands in v1.1.
+Public API · these are the surfaces stable enough to import directly.
 
-  from umbris import Convocation, LLMClient
-  from umbris.llm.providers import auto_provider
+    from umbris import Umbra, LLMClient, Budget, CompositioneLoop, Step
 
-  llm = LLMClient(provider=auto_provider())
-  convocation = Convocation(llm=llm)
-  vision = await convocation.cast("In one sentence, what is stigmergy?")
-  print(vision.answer)
-  print(f"Confidence: {vision.confidence}  Cost: ${vision.cost_usd:.4f}")
+For everything else (Records, planet base classes, consensus internals,
+provenance helpers) import from the submodules directly:
+
+    from umbris.blackboard import Record, RecordType
+    from umbris.consensus import borda_aggregate
+    from umbris.provenance import ProvenanceSummary
 """
 
-from __future__ import annotations
+__version__ = "1.1.0"
 
-__version__ = "1.0.0"
+from .agents.base import Budget
+from .compositione import CompositioneLoop, Step
+from .umbra import Umbra
+from .introspection import Observation, RepoAnalyst, surface_bottlenecks
+from .llm.client import LLMClient
+from .llm.providers import (
+    AnthropicProvider,
+    CompletionResult,
+    LLMProvider,
+    MockProvider,
+    OllamaProvider,
+    OpenAIProvider,
+    ProviderAPIError,
+    ProviderConfigurationError,
+    ProviderError,
+    auto_provider,
+)
 
-# Public surface · placeholders until v1.1 lands the full engine
 __all__ = [
     "__version__",
+    # Core
+    "Umbra",
+    "LLMClient",
+    "Budget",
+    # Compositione
+    "CompositioneLoop",
+    "Step",
+    # Introspection
+    "RepoAnalyst",
+    "Observation",
+    "surface_bottlenecks",
+    # LLM providers (multi-backend)
+    "LLMProvider",
+    "CompletionResult",
+    "AnthropicProvider",
+    "OpenAIProvider",
+    "OllamaProvider",
+    "MockProvider",
+    "auto_provider",
+    "ProviderError",
+    "ProviderConfigurationError",
+    "ProviderAPIError",
 ]

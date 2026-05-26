@@ -4,9 +4,9 @@ build-backend = "hatchling.build"
 
 [project]
 name = "umbris"
-version = "1.0.0"
-description = "UMBRIS · a hermetic-cosmic multi-agent LLM convocation for collective reasoning"
-authors = [{ name = "UmbrisLLM" }]
+version = "1.1.0"
+description = "Ars Memoriae · a hermetic-cosmic multi-agent LLM convocation for collective reasoning"
+authors = [{ name = "UMBRIS Project" }]
 license = { text = "MIT" }
 readme = "README.md"
 requires-python = ">=3.11"

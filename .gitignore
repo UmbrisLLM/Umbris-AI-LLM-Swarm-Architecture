@@ -37,8 +37,10 @@ logs/
 **/.umbris-custos/
 
 # Provenance + traces
-provenance/*.jsonl
-trace/*.jsonl
+provenance/
+**/provenance/
+trace/
+**/trace/
 
 # Secrets
 .env
