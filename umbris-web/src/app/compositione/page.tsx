@@ -7,6 +7,8 @@ export const metadata: Metadata = {
   description: "The doctrine of how the UMBRIS convocation builds itself. From Giordano Bruno's 1591 work on the composition of mnemonic images.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default function CompositionePage() {
   return (
     <main className="min-h-screen bg-umbris-void text-umbris-lunar overflow-x-hidden">

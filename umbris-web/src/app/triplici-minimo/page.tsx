@@ -7,6 +7,8 @@ export const metadata: Metadata = {
   description: "The doctrine of what the UMBRIS convocation is for. From Giordano Bruno's 1591 work on the triple minimum.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default function TripliciMinimoPage() {
   return (
     <main className="min-h-screen bg-umbris-void text-umbris-lunar overflow-x-hidden">

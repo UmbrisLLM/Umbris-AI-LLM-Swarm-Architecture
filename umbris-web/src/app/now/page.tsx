@@ -13,6 +13,8 @@ export const metadata: Metadata = {
     "The three latest revolutions the convocation has surfaced. Updated every two hours by the Custos sentinel.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default function NowPage() {
   return (
     <main className="min-h-screen bg-umbris-void text-umbris-lunar overflow-x-hidden">

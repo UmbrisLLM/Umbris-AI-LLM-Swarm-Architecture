@@ -17,7 +17,7 @@ import dynamic from "next/dynamic";
 import clsx from "clsx";
 import { Divider } from "./ui/Divider";
 import { CastingInput } from "./CastingInput";
-import type { AgentRole } from "@umbris/design";
+import type { AgentRole as PlanetaryRole } from "@umbris/design";
 
 // The 3D planetary system is heavy (R3F + bloom). Load client-only.
 const PlanetarySystem3D = dynamic(
@@ -26,9 +26,9 @@ const PlanetarySystem3D = dynamic(
 );
 
 // Map the lowercase agentId used in the scripted demo to the uppercase
-// AgentRole enum used by PlanetarySystem3D. UMBRA isn't on the orbit so
-// it never enters the active/completed sets.
-function toAgentRole(id: string): AgentRole | null {
+// PlanetaryRole enum used by PlanetarySystem3D. UMBRA isn't on the orbit
+// so it never enters the active/completed sets.
+function toPlanetaryRole(id: string): PlanetaryRole | null {
   const upper = id.toUpperCase();
   if (
     upper === "MERCURIUS" ||
@@ -40,7 +40,7 @@ function toAgentRole(id: string): AgentRole | null {
     upper === "LUNA" ||
     upper === "STELLA"
   ) {
-    return upper as AgentRole;
+    return upper as PlanetaryRole;
   }
   return null;
 }
@@ -509,18 +509,18 @@ function ConvocationSystemFrame({
   costUsd,
 }: ConvocationSystemFrameProps) {
   const active = useMemo(() => {
-    const out = new Set<AgentRole>();
+    const out = new Set<PlanetaryRole>();
     activeAgents.forEach((id) => {
-      const r = toAgentRole(id);
+      const r = toPlanetaryRole(id);
       if (r) out.add(r);
     });
     return out;
   }, [activeAgents]);
 
   const completed = useMemo(() => {
-    const out = new Set<AgentRole>();
+    const out = new Set<PlanetaryRole>();
     completedAgents.forEach((id) => {
-      const r = toAgentRole(id);
+      const r = toPlanetaryRole(id);
       if (r) out.add(r);
     });
     return out;

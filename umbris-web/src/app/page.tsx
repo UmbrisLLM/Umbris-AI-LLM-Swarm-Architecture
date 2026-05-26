@@ -1,4 +1,9 @@
-import dynamic from "next/dynamic";
+import nextDynamic from "next/dynamic";
+
+// Force dynamic SSR · the homepage has framer-motion + R3F dynamic
+// imports that the prerender pass cannot resolve statically.
+export const dynamic = "force-dynamic";
+
 import { Manifesto } from "@/components/Manifesto";
 import { Principles } from "@/components/Principles";
 import { Architecture } from "@/components/Architecture";
@@ -10,12 +15,12 @@ import { TechStack } from "@/components/TechStack";
 import { CallToAction } from "@/components/CallToAction";
 import { Footer } from "@/components/Footer";
 
-const EclipseScene = dynamic(
+const EclipseScene = nextDynamic(
   () => import("@/components/EclipseScene").then((m) => m.EclipseScene),
   { ssr: false, loading: () => null },
 );
 
-const CosmicNebula = dynamic(
+const CosmicNebula = nextDynamic(
   () => import("@/components/CosmicNebula").then((m) => m.CosmicNebula),
   { ssr: false, loading: () => null },
 );

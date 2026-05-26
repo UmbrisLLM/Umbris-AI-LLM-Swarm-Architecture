@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   description: "The long-form manifesto for UMBRIS · Ars Memoriae · De Umbris Idearum.",
 };
 
+// Force dynamic SSR · framer-motion variants cannot resolve statically.
+export const dynamic = "force-dynamic";
+
 export default function ManifestoPage() {
   return (
     <main className="min-h-screen bg-umbris-void px-6 py-32">
