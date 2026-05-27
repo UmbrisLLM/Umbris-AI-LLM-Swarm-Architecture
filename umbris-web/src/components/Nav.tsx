@@ -8,6 +8,7 @@ const ITEMS = [
   { label: "Manifesto",        href: "/manifesto" },
   { label: "Compositione",     href: "/compositione" },
   { label: "Triplici Minimo",  href: "/triplici-minimo" },
+  { label: "Convocation",      href: "/convocation" },
   { label: "Now",              href: "/now" },
 ] as const;
 

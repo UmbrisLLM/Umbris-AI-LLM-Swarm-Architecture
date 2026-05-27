@@ -16,6 +16,11 @@ v1.1 was missing this · this module closes the gap.
 
 Failures here are best-effort · transcript writing never blocks the
 cycle from completing.
+
+In addition to the per-cycle markdown, this module maintains a rolling
+`manifest.json` alongside the transcripts. The manifest is what
+umbrisai.com/convocation polls every 30s to render the live feed · it
+exposes the latest cycle's voices plus a short tail of recent cycles.
 """
 
 from __future__ import annotations
@@ -27,6 +32,41 @@ from pathlib import Path
 from typing import Any
 
 from ..blackboard import Blackboard, Record
+
+
+# Public URL where the live, public-facing transcript lives.
+LIVE_FEED_URL = "https://umbrisai.com/convocation"
+
+# How many recent cycles to keep in the manifest's `recent` tail.
+MANIFEST_RECENT_LIMIT = 50
+
+
+# ──────────────────────────────────────────────────────────────────
+# Personality lookup
+# ──────────────────────────────────────────────────────────────────
+
+
+_PERSONALITY_DISPLAY: dict[str, dict[str, str]] = {
+    "MERCURIUS": {"sigil": "☿", "name": "Mercurius", "descriptor": "the swift"},
+    "VENUS":     {"sigil": "♀", "name": "Venus",     "descriptor": "the gatherer of harmony"},
+    "MARS":      {"sigil": "♂", "name": "Mars",      "descriptor": "the challenger"},
+    "SOL":       {"sigil": "☉", "name": "Sol",       "descriptor": "the radiant"},
+    "IUPPITER":  {"sigil": "♃", "name": "Iuppiter",  "descriptor": "the discerner"},
+    "SATURNUS":  {"sigil": "♄", "name": "Saturnus",  "descriptor": "the falsifier"},
+    "LUNA":      {"sigil": "☽", "name": "Luna",      "descriptor": "the path-mapper"},
+    "STELLA":    {"sigil": "✦", "name": "Stella",    "descriptor": "the fixed star"},
+    "UMBRA":     {"sigil": "⬤", "name": "Umbra",     "descriptor": "the substrate"},
+}
+
+
+def _personality(role: str) -> dict[str, str]:
+    """Return display info (sigil, name, descriptor) for a role string."""
+    if not role:
+        return {"sigil": "·", "name": "?", "descriptor": ""}
+    key = str(role).upper()
+    return _PERSONALITY_DISPLAY.get(
+        key, {"sigil": "·", "name": str(role), "descriptor": ""}
+    )
 
 
 # ──────────────────────────────────────────────────────────────────
@@ -54,6 +94,9 @@ async def write_cycle_transcript(
     cost_usd: float,
 ) -> Path | None:
     """Write the cycle to disk as a readable markdown transcript.
+
+    Also updates `lore/revolutions/auto/manifest.json` so the live
+    convocation feed on umbrisai.com can pick this cycle up.
 
     Returns the path written, or None on any error (never raises ·
     transcript failures must not break the daemon loop).
@@ -90,6 +133,27 @@ async def write_cycle_transcript(
             cost_usd=cost_usd,
         )
         out_path.write_text(md, encoding="utf-8")
+
+        # ─── Update the rolling manifest · best-effort ─────────────
+        try:
+            _update_manifest(
+                out_dir=out_dir,
+                transcript_file=out_path.name,
+                cycle_number=cycle_number,
+                started_iso=started_iso,
+                finished_iso=finished_iso,
+                status=status,
+                reason=reason,
+                verdict_text=verdict_text or "",
+                records=records,
+                files_changed=files_changed,
+                commit_hash=commit_hash,
+                cost_usd=cost_usd,
+            )
+        except Exception:
+            # Manifest writing failure must not break the cycle.
+            pass
+
         return out_path
     except Exception:
         # Best-effort · never let transcript writing break the cycle.
@@ -120,6 +184,13 @@ def _render(
     cost_usd: float,
 ) -> str:
     lines: list[str] = []
+
+    # ─── Live-feed pointer ───────────────────────────────────────────
+    # First line of every transcript points to the public live page so
+    # anyone reading the raw markdown on GitHub knows where the
+    # animated version lives.
+    lines.append(f"<!-- live version · {LIVE_FEED_URL} -->")
+    lines.append("")
 
     # ─── Front-matter / Header ───────────────────────────────────────
     lines.append(f"# Revolution · cycle {cycle_number:04d}")
@@ -204,36 +275,63 @@ def _render(
     lines.append("")
     lines.append("---")
     lines.append("")
-    lines.append("_This transcript was written automatically by the Custos sentinel · `umbris-core/src/umbris/daemon/transcript.py`._")
+    lines.append(
+        "_This transcript was written automatically by the Custos sentinel · "
+        "`umbris-core/src/umbris/daemon/transcript.py`._"
+    )
+    lines.append(
+        f"_The live, animated version lives at [{LIVE_FEED_URL}]({LIVE_FEED_URL})._"
+    )
     lines.append("")
 
     return "\n".join(lines)
 
 
 def _render_record(r: Record) -> list[str]:
-    """One record block · agent + type + content + meta."""
+    """One record block · personality headline + voice (if any) + structured payload."""
     out: list[str] = []
-    glyph = _sigil(str(getattr(r, "agent_role", "")))
-    role_name = getattr(r, "agent_role", "?")
+    role_raw = str(getattr(r, "agent_role", ""))
+    p = _personality(role_raw)
+    glyph = p["sigil"]
+    name = p["name"]
+    descriptor = p["descriptor"]
     agent_id = getattr(r, "agent_id", "?")
     rec_type = getattr(r, "type", "?")
     confidence = float(getattr(r, "confidence", 0.0) or 0.0)
     model = getattr(r, "model", None) or "?"
     cost = float(getattr(r, "cost_estimate", 0.0) or 0.0)
 
-    out.append(f"### {glyph} {role_name} · `{agent_id}`")
+    if descriptor:
+        out.append(f"### {glyph} {name} · {descriptor} · says:")
+    else:
+        out.append(f"### {glyph} {name} · says:")
     out.append("")
-    out.append(f"_type:_ `{rec_type}` · _confidence:_ `{confidence:.2f}` · _model:_ `{model}` · _cost:_ `${cost:.4f}`")
+    out.append(
+        f"_agent:_ `{agent_id}` · _type:_ `{rec_type}` · "
+        f"_confidence:_ `{confidence:.2f}` · _model:_ `{model}` · _cost:_ `${cost:.4f}`"
+    )
     out.append("")
+
     content = getattr(r, "content", "")
-    if isinstance(content, dict):
-        # Pretty-print JSON contents.
-        try:
-            content_str = json.dumps(content, indent=2, ensure_ascii=False)
-        except Exception:
-            content_str = str(content)
+    voice = _extract_voice(content)
+
+    if voice:
+        # Voice is the headline · render it as a blockquote in italics.
+        for vline in str(voice).splitlines() or [""]:
+            out.append(f"> _{vline}_" if vline else ">")
+        out.append("")
+        # Render the rest of the content as the structured payload.
+        rest = _content_without_voice(content)
+        if rest is not None and rest != {} and rest != "":
+            out.append("_structured payload:_")
+            out.append("")
+            out.append("```json")
+            out.append(_truncate(_pretty_json(rest), 1200))
+            out.append("```")
+    elif isinstance(content, dict):
+        # No voice key · pretty-print the dict as before.
         out.append("```json")
-        out.append(_truncate(content_str, 1500))
+        out.append(_truncate(_pretty_json(content), 1500))
         out.append("```")
     else:
         # Plain prose · quote it so it reads as speech.
@@ -244,27 +342,174 @@ def _render_record(r: Record) -> list[str]:
 
 
 # ──────────────────────────────────────────────────────────────────
+# Manifest writer
+# ──────────────────────────────────────────────────────────────────
+
+
+def _update_manifest(
+    *,
+    out_dir: Path,
+    transcript_file: str,
+    cycle_number: int,
+    started_iso: str,
+    finished_iso: str,
+    status: str,
+    reason: str,
+    verdict_text: str,
+    records: list[Record],
+    files_changed: list[str],
+    commit_hash: str | None,
+    cost_usd: float,
+) -> None:
+    """Rewrite `manifest.json` to reflect this cycle as the latest.
+
+    The manifest is the contract with umbrisai.com/convocation · keep
+    the schema stable. If you change it, also update the page reader.
+    """
+    manifest_path = out_dir / "manifest.json"
+
+    voices = [_voice_entry(r) for r in records]
+    voices = [v for v in voices if v is not None]
+
+    latest_summary = {
+        "file": transcript_file,
+        "cycle": cycle_number,
+        "started_at": started_iso,
+        "finished_at": finished_iso,
+        "status": status,
+        "reason": reason,
+        "verdict": (verdict_text or "").strip(),
+        "cost_usd": float(cost_usd or 0.0),
+        "files_changed": list(files_changed or []),
+        "commit_hash": commit_hash,
+        "voices": voices,
+    }
+
+    recent_entry = {
+        "file": transcript_file,
+        "cycle": cycle_number,
+        "status": status,
+        "started_at": started_iso,
+        "verdict": _truncate((verdict_text or "").strip(), 280),
+    }
+
+    # Load any existing manifest so we can append to `recent`.
+    existing: dict[str, Any] = {}
+    if manifest_path.exists():
+        try:
+            existing = json.loads(manifest_path.read_text(encoding="utf-8"))
+            if not isinstance(existing, dict):
+                existing = {}
+        except Exception:
+            existing = {}
+
+    recent: list[dict[str, Any]] = []
+    raw_recent = existing.get("recent", [])
+    if isinstance(raw_recent, list):
+        # Drop any previous entry for this cycle number · we are
+        # rewriting it (re-runs / status changes).
+        recent = [
+            e
+            for e in raw_recent
+            if isinstance(e, dict) and e.get("cycle") != cycle_number
+        ]
+    recent.insert(0, recent_entry)
+    recent = recent[:MANIFEST_RECENT_LIMIT]
+
+    manifest = {
+        "updated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "latest": latest_summary,
+        "recent": recent,
+    }
+
+    # Atomic-ish write · write to a temp file then replace.
+    tmp_path = manifest_path.with_suffix(".json.tmp")
+    tmp_path.write_text(
+        json.dumps(manifest, indent=2, ensure_ascii=False),
+        encoding="utf-8",
+    )
+    tmp_path.replace(manifest_path)
+
+
+def _voice_entry(r: Record) -> dict[str, Any] | None:
+    """Build the per-record entry for `manifest.latest.voices`.
+
+    Returns None if there is nothing to show (e.g. no voice, no
+    salvageable prose). Records without a voice but with prose content
+    still surface · we just fall back to the prose itself.
+    """
+    role_raw = str(getattr(r, "agent_role", "") or "")
+    p = _personality(role_raw)
+    content = getattr(r, "content", "")
+    voice = _extract_voice(content)
+
+    if not voice:
+        if isinstance(content, str) and content.strip():
+            voice = _truncate(content.strip(), 400)
+        elif isinstance(content, dict):
+            # Try common fallback fields · keeps something to show.
+            for key in ("summary", "headline", "answer", "observation", "content"):
+                v = content.get(key)
+                if isinstance(v, str) and v.strip():
+                    voice = _truncate(v.strip(), 400)
+                    break
+
+    if not voice:
+        return None
+
+    return {
+        "role": role_raw.upper(),
+        "sigil": p["sigil"],
+        "name": p["name"],
+        "descriptor": p["descriptor"],
+        "agent_id": getattr(r, "agent_id", ""),
+        "type": str(getattr(r, "type", "")),
+        "confidence": float(getattr(r, "confidence", 0.0) or 0.0),
+        "model": getattr(r, "model", None),
+        "cost_usd": float(getattr(r, "cost_estimate", 0.0) or 0.0),
+        "voice": voice,
+        "timestamp": _iso_ts(getattr(r, "timestamp", None)),
+    }
+
+
+# ──────────────────────────────────────────────────────────────────
 # Helpers
 # ──────────────────────────────────────────────────────────────────
 
 
-_SIGIL = {
-    "MERCURIUS": "☿",
-    "VENUS":     "♀",
-    "MARS":      "♂",
-    "SOL":       "☉",
-    "IUPPITER":  "♃",
-    "SATURNUS":  "♄",
-    "LUNA":      "☽",
-    "STELLA":    "✦",
-    "UMBRA":     "⬤",
-    "mercurius": "☿", "venus": "♀", "mars": "♂", "sol": "☉",
-    "iuppiter": "♃", "saturnus": "♄", "luna": "☽", "stella": "✦", "umbra": "⬤",
-}
+def _extract_voice(content: Any) -> str | None:
+    """Pull the `voice` field out of a record's content, if present."""
+    if isinstance(content, dict):
+        v = content.get("voice")
+        if isinstance(v, str) and v.strip():
+            return v.strip()
+    return None
 
 
-def _sigil(role: str) -> str:
-    return _SIGIL.get(role, "·")
+def _content_without_voice(content: Any) -> Any:
+    """Return the structured content sans the `voice` key, or None if empty."""
+    if isinstance(content, dict):
+        rest = {k: v for k, v in content.items() if k != "voice"}
+        return rest if rest else None
+    return content
+
+
+def _pretty_json(value: Any) -> str:
+    try:
+        return json.dumps(value, indent=2, ensure_ascii=False, default=str)
+    except Exception:
+        return str(value)
+
+
+def _iso_ts(value: Any) -> str | None:
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        try:
+            return value.astimezone(timezone.utc).isoformat(timespec="seconds")
+        except Exception:
+            return value.isoformat()
+    return str(value)
 
 
 def _slugify(s: str) -> str:

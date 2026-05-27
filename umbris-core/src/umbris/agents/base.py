@@ -26,6 +26,7 @@ from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
 from ..blackboard import AgentRole, Blackboard, Record, RecordType
+from ..personalities import PERSONALITIES, SHARED_REGISTER
 
 if TYPE_CHECKING:
     from ..llm.client import LLMClient
@@ -108,7 +109,7 @@ class LLMAgent(Agent):
         user_message = self._build_user_message(task, context)
 
         result = await self.llm.complete(
-            system=self.system_prompt,
+            system=self._effective_system_prompt(),
             user=user_message,
             model=self.model,
             max_tokens=self.max_tokens,
@@ -117,6 +118,15 @@ class LLMAgent(Agent):
         )
 
         content, confidence, parsed_extras = self.parse_response(result.text)
+
+        # If the planet emitted a `voice` line, attach it alongside the
+        # structured content so the transcript + live feed can render it.
+        voice = parsed_extras.get("voice")
+        if voice:
+            if isinstance(content, dict):
+                content = {**content, "voice": voice}
+            else:
+                content = {"content": content, "voice": voice}
 
         return Record(
             agent_id=self.agent_id,
@@ -128,6 +138,23 @@ class LLMAgent(Agent):
             model=result.model,
             cost_estimate=result.cost_usd,
         )
+
+    def _effective_system_prompt(self) -> str:
+        """Compose the personality + shared-register block in front of
+        the agent's role-specific system prompt."""
+        personality = PERSONALITIES.get(self.role)
+        if personality is None:
+            return self.system_prompt
+        examples = " / ".join(f'"{p}"' for p in personality.opening_phrases)
+        personality_block = (
+            f"{SHARED_REGISTER}\n\n"
+            f"## You are {personality.sigil} {personality.name}\n\n"
+            f"{personality.sphere}\n\n"
+            f"### Archetype\n{personality.archetype}\n\n"
+            f"### Voice\n{personality.register}\n\n"
+            f"### How you tend to begin\n{examples}\n"
+        )
+        return f"{personality_block}\n\n## Role-specific instructions\n\n{self.system_prompt}"
 
     def _build_user_message(self, task: Task, context: str) -> str:
         return (
@@ -142,23 +169,38 @@ class LLMAgent(Agent):
             "Respond with a single JSON object, and ONLY that object · no\n"
             "preamble, no markdown fences, no commentary. Schema:\n"
             "{\n"
-            '  "content": <your output as string or object>,\n'
+            '  "voice": <one to four short sentences in your personality\'s\n'
+            "            voice · the human-readable line · what your planet\n"
+            "            actually says aloud. This is read by humans on the\n"
+            "            live feed at umbrisai.com. Be brilliant, be concise,\n"
+            "            be in character.>,\n"
+            '  "content": <your structured output · string OR object · the\n'
+            "             machine-readable payload the engine consumes>,\n"
             '  "confidence": <float 0.0 to 1.0, your self-assessed confidence>\n'
-            "}"
+            "}\n\n"
+            "The `voice` field is mandatory · it is what makes the convocation\n"
+            "legible to humans. The `content` field is what the engine reads\n"
+            "for consensus, Borda ranking, and patch composition."
         )
 
     def parse_response(self, text: str) -> tuple[Any, float, dict[str, Any]]:
-        """Default parser: extract a JSON object with `content` + `confidence`.
+        """Default parser: extract a JSON object with `voice` + `content` + `confidence`.
 
-        Returns (content, confidence, extras_dict). Subclasses can override
-        to return additional fields via the extras dict · e.g. Saturnus
-        sets `record_type` based on whether the candidate was falsified.
+        Returns (content, confidence, extras_dict). The extras dict carries
+        the natural-prose `voice` line if the planet emitted one. Subclasses
+        can override to return additional fields via the extras dict · e.g.
+        Saturnus sets `record_type` based on whether the candidate was
+        falsified.
         """
         payload = _extract_json_object(text)
         content = payload.get("content", text)
         confidence = float(payload.get("confidence", 0.5))
         confidence = max(0.0, min(1.0, confidence))
-        return content, confidence, {}
+        extras: dict[str, Any] = {}
+        voice = payload.get("voice")
+        if isinstance(voice, str) and voice.strip():
+            extras["voice"] = voice.strip()
+        return content, confidence, extras
 
 
 # ──────────────────────────────────────────────────────────────────
