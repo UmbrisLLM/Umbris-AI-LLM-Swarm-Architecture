@@ -41,6 +41,7 @@ from .git_ops import (
 )
 from .log import CycleEvent, now_iso
 from .safety import CostLedger, PathPolicy
+from .transcript import write_cycle_transcript
 
 
 # ──────────────────────────────────────────────────────────────────
@@ -137,6 +138,15 @@ async def run_cycle(
     start = time.time()
     started_iso = now_iso()
 
+    # ── Per-cycle state captured by the transcript writer ─────────
+    # These accumulate as the cycle progresses; whatever exists at the
+    # moment of return is what the transcript records.
+    surface_result_ref: list[Any] = [None]   # holds the RunResult once produced
+    verdict_text_ref:   list[str | None] = [None]
+    patch_summary_ref:  list[str | None] = [None]
+    patch_files_ref:    list[list[tuple[str, str]]] = [[]]
+    raw_patcher_ref:    list[str | None] = [None]
+
     def make_event(
         *,
         status: str,
@@ -161,30 +171,61 @@ async def run_cycle(
             cost_usd=round(cost_usd, 4),
         )
 
+    async def finalize(
+        event: CycleEvent,
+    ) -> CycleEvent:
+        """Write the per-cycle markdown transcript before returning.
+        Never raises · transcript failures must not break the cycle."""
+        try:
+            sr = surface_result_ref[0]
+            await write_cycle_transcript(
+                repo_root=config.repo_root,
+                cycle_number=event.cycle,
+                started_iso=event.started_at,
+                finished_iso=event.finished_at,
+                wall_seconds=event.wall_seconds,
+                status=event.status,
+                reason=event.reason,
+                verdict_text=verdict_text_ref[0],
+                verdict_blackboard=getattr(sr, "blackboard", None) if sr is not None else None,
+                patch_summary=patch_summary_ref[0],
+                patch_files=patch_files_ref[0],
+                raw_patcher_response=raw_patcher_ref[0],
+                observations_count=event.observations_count,
+                files_changed=event.files_changed,
+                commit_hash=event.commit_hash,
+                cost_usd=event.cost_usd,
+            )
+        except Exception:
+            pass
+        return event
+
     # ── 0. Cost cap pre-check ──────────────────────────────────
     cost_check = config.ledger.check_before_cycle()
     if not cost_check.allowed:
-        return CycleResult(event=make_event(
+        return CycleResult(event=await finalize(make_event(
             status="halted",
             reason=f"cost-cap: {cost_check.reason}",
-        ))
+        )))
 
     # ── 1. Scan the repo ───────────────────────────────────────
     analyst = RepoAnalyst(repo_root=config.repo_root)
     observations = analyst.scan()
     if not observations:
-        return CycleResult(event=make_event(
+        return CycleResult(event=await finalize(make_event(
             status="skipped",
             reason="no observations surfaced from scan",
             observations_count=0,
-        ))
+        )))
 
     # ── 2. Surface a bottleneck ────────────────────────────────
     umbra = Umbra(llm=llm)
     surface_result = await surface_bottlenecks(
         umbra, observations, n=config.observations_top_n,
     )
+    surface_result_ref[0] = surface_result   # for the transcript writer
     verdict_text = _extract_text(surface_result.answer)
+    verdict_text_ref[0] = verdict_text
     cycle_cost = float(surface_result.summary.total_cost_usd or 0.0)
 
     # ── 3. Ask the convocation for a structured patch ──────────
@@ -192,16 +233,24 @@ async def run_cycle(
         umbra, verdict_text=verdict_text, policy=config.policy,
     )
     cycle_cost += patch_cost
+    raw_patcher_ref[0] = raw
 
     if patch is None:
         config.ledger.record_cycle(cost_usd=cycle_cost)
-        return CycleResult(event=make_event(
+        return CycleResult(event=await finalize(make_event(
             status="skipped",
             reason="patcher response failed to parse / validate",
             observations_count=len(observations),
             verdict_summary=verdict_text[:200],
             cost_usd=cycle_cost,
-        ))
+        )))
+
+    # Capture the patch contents for the transcript before any policy check.
+    patch_summary_ref[0] = patch.summary
+    try:
+        patch_files_ref[0] = [(pf.path, pf.content) for pf in patch.files]
+    except Exception:
+        patch_files_ref[0] = []
 
     # ── 4. Apply patch to disk (with policy enforcement) ───────
     apply_result: ApplyResult = apply_patch(
@@ -210,13 +259,13 @@ async def run_cycle(
     if not apply_result.ok:
         # Nothing was written (apply_patch validates everything pre-write).
         config.ledger.record_cycle(cost_usd=cycle_cost)
-        return CycleResult(event=make_event(
+        return CycleResult(event=await finalize(make_event(
             status="skipped",
             reason=f"apply rejected: {apply_result.reason}",
             observations_count=len(observations),
             verdict_summary=patch.summary,
             cost_usd=cycle_cost,
-        ))
+        )))
 
     written = apply_result.paths_written or []
 
@@ -230,14 +279,14 @@ async def run_cycle(
         if not passed:
             restore_working_tree(config.repo_root)
             config.ledger.record_cycle(cost_usd=cycle_cost)
-            return CycleResult(event=make_event(
+            return CycleResult(event=await finalize(make_event(
                 status="failed",
                 reason=f"test gate failed:\n{log[-400:]}",
                 observations_count=len(observations),
                 verdict_summary=patch.summary,
                 files_changed=written,
                 cost_usd=cycle_cost,
-            ))
+            )))
 
     # ── 6. Build gate (only if a web file was touched) ─────────
     if config.run_build_when_web_touched and _any_path_in("umbris-web", written):
@@ -249,14 +298,14 @@ async def run_cycle(
         if not passed:
             restore_working_tree(config.repo_root)
             config.ledger.record_cycle(cost_usd=cycle_cost)
-            return CycleResult(event=make_event(
+            return CycleResult(event=await finalize(make_event(
                 status="failed",
                 reason=f"build gate failed:\n{log[-400:]}",
                 observations_count=len(observations),
                 verdict_summary=patch.summary,
                 files_changed=written,
                 cost_usd=cycle_cost,
-            ))
+            )))
 
     # ── 7. Commit + push (if enabled) ──────────────────────────
     commit_hash: str | None = None
@@ -266,27 +315,27 @@ async def run_cycle(
         if not has_uncommitted_changes(config.repo_root):
             # Nothing actually changed on disk · unusual but safe to skip.
             config.ledger.record_cycle(cost_usd=cycle_cost)
-            return CycleResult(event=make_event(
+            return CycleResult(event=await finalize(make_event(
                 status="skipped",
                 reason="patch applied but git sees no changes",
                 observations_count=len(observations),
                 verdict_summary=patch.summary,
                 files_changed=written,
                 cost_usd=cycle_cost,
-            ))
+            )))
 
         add_res = add(config.repo_root, list(changed_files(config.repo_root)))
         if not add_res.ok:
             restore_working_tree(config.repo_root)
             config.ledger.record_cycle(cost_usd=cycle_cost)
-            return CycleResult(event=make_event(
+            return CycleResult(event=await finalize(make_event(
                 status="failed",
                 reason=f"git add failed: {add_res.stderr[-200:]}",
                 observations_count=len(observations),
                 verdict_summary=patch.summary,
                 files_changed=written,
                 cost_usd=cycle_cost,
-            ))
+            )))
 
         message = _compositione_commit_message(
             cycle_n=config.cycle_number,
@@ -298,14 +347,14 @@ async def run_cycle(
         if not commit_res.ok:
             restore_working_tree(config.repo_root)
             config.ledger.record_cycle(cost_usd=cycle_cost)
-            return CycleResult(event=make_event(
+            return CycleResult(event=await finalize(make_event(
                 status="failed",
                 reason=f"git commit failed: {commit_res.stderr[-200:]}",
                 observations_count=len(observations),
                 verdict_summary=patch.summary,
                 files_changed=written,
                 cost_usd=cycle_cost,
-            ))
+            )))
 
         commit_hash = head_short_hash(config.repo_root)
         push_res = push(config.repo_root, remote=config.remote, branch=config.branch)
@@ -314,7 +363,7 @@ async def run_cycle(
             # We leave the commit in place · the next revolution's
             # cost-cap check and the next push attempt will retry.
             config.ledger.record_cycle(cost_usd=cycle_cost)
-            return CycleResult(event=make_event(
+            return CycleResult(event=await finalize(make_event(
                 status="failed",
                 reason=f"git push failed: {push_res.stderr[-300:]}",
                 observations_count=len(observations),
@@ -322,12 +371,12 @@ async def run_cycle(
                 files_changed=written,
                 commit_hash=commit_hash,
                 cost_usd=cycle_cost,
-            ))
+            )))
         pushed = True
 
     config.ledger.record_cycle(cost_usd=cycle_cost)
     return CycleResult(
-        event=make_event(
+        event=await finalize(make_event(
             status="shipped",
             reason="ok",
             observations_count=len(observations),
@@ -335,7 +384,7 @@ async def run_cycle(
             files_changed=written,
             commit_hash=commit_hash,
             cost_usd=cycle_cost,
-        ),
+        )),
         pushed=pushed,
     )
 
