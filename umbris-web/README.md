@@ -1,6 +1,6 @@
 # `umbris-web` · the UMBRIS marketing site
 
-The Next.js 14 site at **[tryumbris.com](https://tryumbris.com)**. Manifesto, doctrine, lineage, /now page (live convocation status), build log.
+The Next.js 14 site at **[umbrisai.com](https://umbrisai.com)**. Manifesto, doctrine, lineage, /now page (live convocation status), build log.
 
 ## Status
 

@@ -242,7 +242,7 @@ umbris/
 │       ├── lib/                  # tauri.ts, sse.ts, types.ts
 │       └── store/                # useEngineStore, useComposerStore,
 │                                 # useRunStore, useCustosStore (Zustand)
-└── umbris-web/                   # the marketing site (tryumbris.com)
+└── umbris-web/                   # the marketing site (umbrisai.com)
 ```
 
 ---

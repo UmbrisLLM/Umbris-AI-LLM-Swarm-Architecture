@@ -2,7 +2,7 @@
   "name": "umbris-web",
   "version": "1.0.0",
   "private": true,
-  "description": "UMBRIS · the marketing site at tryumbris.com",
+  "description": "UMBRIS · the marketing site at umbrisai.com",
   "license": "MIT",
   "scripts": {
     "dev": "next dev",

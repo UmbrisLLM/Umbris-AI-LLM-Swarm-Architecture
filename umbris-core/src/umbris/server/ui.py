@@ -331,7 +331,7 @@ INDEX_HTML: str = r"""<!doctype html>
   <span>
     <a href="https://github.com/UmbrisLLM/Umbris-AI-LLM-Swarm-Architecture" target="_blank" rel="noreferrer">GitHub</a>
     &nbsp;·&nbsp;
-    <a href="https://www.tryumbris.com" target="_blank" rel="noreferrer">tryumbris.com</a>
+    <a href="https://www.umbrisai.com" target="_blank" rel="noreferrer">umbrisai.com</a>
   </span>
 </footer>
 

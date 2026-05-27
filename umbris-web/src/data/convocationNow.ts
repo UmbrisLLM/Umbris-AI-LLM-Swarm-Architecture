@@ -49,7 +49,7 @@ export const CONVOCATION_NOW: Revolution[] = [
   },
   {
     numeral: "II",
-    title: "The website lands · tryumbris.com goes live",
+    title: "The website lands · umbrisai.com goes live",
     description:
       "The marketing site ships under UmbrisLLM/Umbris-AI-LLM-Swarm-Architecture/umbris-web. Eclipse hero on the homepage, all three doctrine routes (compositione, triplici-minimo, manifesto), the live /now page, full Brunonian register from top to bottom.",
     status: "in-progress",

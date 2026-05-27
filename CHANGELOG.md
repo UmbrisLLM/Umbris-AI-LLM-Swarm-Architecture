@@ -12,11 +12,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 - `umbris-core` · full Python engine implementation (sibling of `opus-core` with planetary role renames)
 - `umbris-studio` · Tauri + Next.js desktop HUD with the Sphere of Shadows
-- `umbris-web` · marketing site at `tryumbris.com`
+- `umbris-web` · marketing site at `umbrisai.com`
 - The Custos · autonomous sentinel running every 2 hours via GitHub Actions
 - $UMBRIS token deploy on Solana
 - First-run wizard with Stronghold-backed key storage
-- Hosted endpoint at `api.tryumbris.com`
+- Hosted endpoint at `api.umbrisai.com`
 - Cross-platform signed installers via GitHub Actions
 
 ---

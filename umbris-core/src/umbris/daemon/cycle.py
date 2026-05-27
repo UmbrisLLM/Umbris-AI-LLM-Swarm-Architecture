@@ -374,5 +374,5 @@ def _compositione_commit_message(
         f"Cost:     ${cost_usd:.4f}\n"
         f"Revolution:    {cycle_n}\n"
         f"\n"
-        f"Co-Authored-By: UMBRIS Convocation <noreply@tryumbris.com>\n"
+        f"Co-Authored-By: UMBRIS Convocation <noreply@umbrisai.com>\n"
     )

@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: "UMBRIS · Ars Memoriae",
   description:
     "A hermetic-cosmic multi-agent LLM convocation for collective reasoning. De Umbris Idearum · Ex umbris in lumen.",
-  metadataBase: new URL("https://tryumbris.com"),
+  metadataBase: new URL("https://umbrisai.com"),
   openGraph: {
     title: "UMBRIS · Ars Memoriae",
     description:

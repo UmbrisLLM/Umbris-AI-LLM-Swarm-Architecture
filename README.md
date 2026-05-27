@@ -12,7 +12,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-9C7BD9.svg?style=flat-square)](LICENSE)
 [![Brand: Eclipse](https://img.shields.io/badge/brand-eclipse-9C7BD9?style=flat-square)](brand/)
 [![Predecessor: OPUS](https://img.shields.io/badge/predecessor-OPUS-DCDEE7?style=flat-square)](https://github.com/0pusAI/Opus-Agent-Swarm-LLM-Framework)
-[![Website](https://img.shields.io/badge/site-tryumbris.com-9C7BD9.svg?style=flat-square)](https://tryumbris.com)
+[![Website](https://img.shields.io/badge/site-umbrisai.com-9C7BD9.svg?style=flat-square)](https://umbrisai.com)
 [![Engine](https://img.shields.io/badge/umbris--core-v1.1-9C7BD9.svg?style=flat-square)](umbris-core/)
 
 </div>
@@ -138,7 +138,7 @@ Everything below is live in this repository today, working, and runnable.
 | **[`packages/umbris-design`](packages/umbris-design/)** | ✅ live | Brand single-source · tokens, fonts, 9 planetary sigils as React SVGs, chrome ornaments, Tailwind theme |
 | **[`umbris-core`](umbris-core/)** | ✅ live · v1.1 | The Python convocation engine · Umbra orchestrator · Blackboard substrate · 9 agents · 3-stage consensus · 4 LLM providers · FastAPI server · the Custos daemon · `umbris cast` CLI |
 | **[`umbris-studio`](umbris-studio/)** | ✅ live · v1.1 | The desktop application · Tauri + Next.js · the Eclipse Orb at the centre, eight planetary sigils on the orbit, live deliberation HUD |
-| **[`umbris-web`](umbris-web/)** | ✅ live · v1.1 | The marketing site at [tryumbris.com](https://tryumbris.com) · 3D Eclipse hero, 11-section homepage, the Live Convocation cinematic, /now revolutions log |
+| **[`umbris-web`](umbris-web/)** | ✅ live · v1.1 | The marketing site at [umbrisai.com](https://umbrisai.com) · 3D Eclipse hero, 11-section homepage, the Live Convocation cinematic, /now revolutions log |
 | **[`lore/`](lore/)** | ✅ live | The two doctrines, the manifesto, the planetary codex, the revolutions log |
 | **[`docs/`](docs/)** | ✅ live | Whitepaper, architecture deep-dive, lineage essay, quickstart, tokenomics, Custos operator guide |
 | **The Custos** | ✅ ships in umbris-core | Autonomous sentinel · runs revolutions on a public cadence, casts patches, gates them through pytest + npm build, commits + pushes to main |
@@ -325,7 +325,7 @@ What v1.2 adds:
 
 - $UMBRIS Solana mint + treasury wiring
 - The Custos graduates from create-only to full-file-edit
-- Hosted API at `api.tryumbris.com`
+- Hosted API at `api.umbrisai.com`
 - Cross-platform signed Studio installers (Windows .msi, macOS .dmg, Linux .AppImage)
 - Native UMBRIS Eclipse icon set replacing the placeholder Tauri icons
 - Vector + graph memory backends wired (currently stubbed)

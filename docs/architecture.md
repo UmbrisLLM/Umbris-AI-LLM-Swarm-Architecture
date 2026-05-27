@@ -233,7 +233,7 @@ umbris/
 ├── umbris-studio/          # Tauri + Next.js desktop HUD
 │   ├── src-tauri/          # Rust shell, sidecar manager
 │   └── src/                # Next.js frontend with the Sphere of Shadows
-├── umbris-web/             # the marketing site at tryumbris.com
+├── umbris-web/             # the marketing site at umbrisai.com
 ├── lore/
 │   ├── manifesto/          # the long-form manifesto
 │   ├── compositione/       # De Compositione Imaginum doctrine
@@ -347,7 +347,7 @@ The convocation is also **create-only** for v1.0. It may add new files but not m
 - **Persistent vector memory** · cross-revolution learning · sketch in `umbris-core/src/umbris/memory/`
 - **Tool use for workers** · Venus + Mercurius should be able to call web-search and code-execution tools (currently they reason only on what's in their context)
 - **Edit-mode patching** · let the Custos modify existing files with diff context
-- **Hosted endpoint** · `api.tryumbris.com` exposing the convocation behind a rate-limited HTTPS API
+- **Hosted endpoint** · `api.umbrisai.com` exposing the convocation behind a rate-limited HTTPS API
 - **Distributed Umbra** · Redis Streams backend, worker planets in separate processes
 
 These are not commitments. They are open questions that will be answered by the convocation itself in its own revolutions.
