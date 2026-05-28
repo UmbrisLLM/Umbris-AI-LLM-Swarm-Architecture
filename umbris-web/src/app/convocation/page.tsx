@@ -4,11 +4,20 @@
  * /convocation · the live public-facing feed of the UMBRIS convocation.
  *
  * Polls the manifest the Custos sentinel writes to
- * `lore/revolutions/auto/manifest.json` every 30 seconds and renders
+ * `lore/revolutions/auto/manifest.json` every 20 seconds and renders
  * the latest cycle's voices as a scrolling, animated conversation.
  *
- * No backend on our side · the manifest is just a file in the public
- * GitHub repo. We fetch the raw URL with a cache-buster.
+ * Two clocks make this feel live:
+ *   1) a 1-second `now` tick re-renders the status bar so elapsed,
+ *      cost, manifest age, and the next-poll countdown all update
+ *      every second
+ *   2) a 20-second poll hits /api/manifest (our Vercel edge proxy)
+ *      which bypasses GitHub raw's 5-minute CDN cache · the page is
+ *      never more than ~20s behind what the daemon has committed
+ *
+ * The LIVE pill in the status bar pulses whenever a fresh poll lands
+ * and the cycle list at the right shows every finished cycle the
+ * daemon has surfaced.
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -76,6 +85,11 @@ interface ManifestRecent {
   status: string;
   started_at: string;
   verdict: string;
+  // Optional · the daemon may include these on newer manifests. The
+  // page degrades gracefully when they are absent.
+  finished_at?: string | null;
+  cost_usd?: number;
+  commit_hash?: string | null;
 }
 
 interface Manifest {
@@ -181,11 +195,20 @@ export default function ConvocationPage() {
   const [loading, setLoading] = useState(true);
   const [selectedCycle, setSelectedCycle] = useState<number | null>(null);
   const [now, setNow] = useState(Date.now());
+  // When did the page itself last receive a successful fetch? Used by
+  // the LIVE pill, the "fresh" flash, and the next-poll countdown ·
+  // independent of manifest.updated_at (which is the daemon's write
+  // time, possibly minutes old if the daemon is between cycles).
+  const [lastFetchAt, setLastFetchAt] = useState<number | null>(null);
+  const [freshFlash, setFreshFlash] = useState(false);
+  // Track the manifest digest we last saw so we can flash only when
+  // genuinely new content lands.
+  const lastDigestRef = useRef<string>("");
 
   const fetchManifest = useCallback(async () => {
     try {
       // Cache-buster so the browser doesn't hand us a stale copy on
-      // re-polls. The raw GitHub CDN honours this.
+      // re-polls. The edge proxy also forces upstream `no-store`.
       const res = await fetch(`${MANIFEST_URL}?t=${Date.now()}`, {
         cache: "no-store",
       });
@@ -193,6 +216,15 @@ export default function ConvocationPage() {
       const data: Manifest = await res.json();
       setManifest(data);
       setError(null);
+      setLastFetchAt(Date.now());
+
+      // Detect new content · flash the LIVE pill briefly.
+      const digest = `${data.updated_at}:${data.latest?.cycle}:${data.latest?.voices?.length}:${data.latest?.status}`;
+      if (lastDigestRef.current && lastDigestRef.current !== digest) {
+        setFreshFlash(true);
+        window.setTimeout(() => setFreshFlash(false), 1400);
+      }
+      lastDigestRef.current = digest;
     } catch (e) {
       setError(e instanceof Error ? e.message : "fetch failed");
     } finally {
@@ -200,7 +232,7 @@ export default function ConvocationPage() {
     }
   }, []);
 
-  // Initial fetch + 30s poll
+  // Initial fetch + 20s poll
   useEffect(() => {
     fetchManifest();
     const id = window.setInterval(fetchManifest, POLL_INTERVAL_MS);
@@ -274,9 +306,17 @@ export default function ConvocationPage() {
               isHistorical={isHistorical}
               now={now}
               updatedAt={manifest.updated_at}
+              lastFetchAt={lastFetchAt}
+              freshFlash={freshFlash}
+              pollIntervalMs={POLL_INTERVAL_MS}
+              totalCycles={Math.max(
+                manifest.latest.cycle,
+                manifest.recent.length,
+              )}
+              repoBase={REPO_BASE}
             />
 
-            <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-8 mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-8 mt-8">
               {/* The voices · main column */}
               <VoiceFeed
                 voices={viewing.voices}
@@ -286,11 +326,13 @@ export default function ConvocationPage() {
                 status={viewing.status}
               />
 
-              {/* Sidebar · recent cycles */}
+              {/* Sidebar · every finished cycle the daemon has surfaced */}
               <RecentSidebar
                 recent={manifest.recent}
+                latest={manifest.latest}
                 selectedCycle={viewing.cycle}
                 latestCycle={manifest.latest.cycle}
+                repoBase={REPO_BASE}
                 onSelect={(c) =>
                   setSelectedCycle(c === manifest.latest.cycle ? null : c)
                 }
@@ -302,8 +344,8 @@ export default function ConvocationPage() {
         {/* ─── Foot ─────────────────────────────────────────────── */}
         <div className="mt-20 pt-10 border-t border-umbris-grey/30 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <p className="umbris-mono text-umbris-stellar text-[10px] uppercase tracking-widest">
-            · polled every 30s from the public manifest · no backend in the
-            middle ·
+            · polled every 20s via an edge proxy · the manifest is committed
+            straight to the public repo ·
           </p>
           <div className="flex flex-wrap items-center gap-3">
             <a
@@ -337,15 +379,46 @@ interface StatusBarProps {
   isHistorical: boolean;
   now: number;
   updatedAt: string;
+  lastFetchAt: number | null;
+  freshFlash: boolean;
+  pollIntervalMs: number;
+  totalCycles: number;
+  repoBase: string;
 }
 
-function StatusBar({ viewing, isHistorical, updatedAt }: StatusBarProps) {
+function StatusBar({
+  latest,
+  viewing,
+  isHistorical,
+  now,
+  updatedAt,
+  lastFetchAt,
+  freshFlash,
+  pollIntervalMs,
+  totalCycles,
+  repoBase,
+}: StatusBarProps) {
   const label = statusLabel(viewing.status);
   const deliberating = isDeliberating(viewing.status);
-  // The clock should depend on the `now` tick · `formatElapsed` reads
-  // Date.now() directly so the parent's `now` state is what drives
-  // re-renders.
+  // All time-derived strings read Date.now() inside their helpers ·
+  // re-rendering once a second (driven by the parent's `now` state) is
+  // what makes elapsed, manifest age, and the next-poll countdown
+  // tick visibly.
   const elapsed = formatElapsed(viewing.started_at);
+  const nextPollSec =
+    lastFetchAt != null
+      ? Math.max(0, Math.ceil((lastFetchAt + pollIntervalMs - now) / 1000))
+      : null;
+  const fetchAgeSec =
+    lastFetchAt != null ? Math.floor((now - lastFetchAt) / 1000) : null;
+  // We consider the connection live if we've had a successful fetch
+  // within the last 2× the poll interval. Beyond that, mark stale.
+  const live =
+    fetchAgeSec != null && fetchAgeSec < (pollIntervalMs / 1000) * 2;
+
+  const commitShort = latest.commit_hash
+    ? latest.commit_hash.slice(0, 7)
+    : null;
 
   return (
     <div
@@ -398,22 +471,86 @@ function StatusBar({ viewing, isHistorical, updatedAt }: StatusBarProps) {
 
         <div>
           <p className="umbris-eyebrow text-umbris-stellar text-[9px] mb-1">
-            cost
+            cost · cycle
           </p>
           <p className="umbris-mono text-umbris-violet text-sm tabular-nums">
             ${(viewing.cost_usd || 0).toFixed(4)}
           </p>
         </div>
+
+        <div className="w-px h-12 bg-umbris-grey/30 hidden md:block" />
+
+        <div>
+          <p className="umbris-eyebrow text-umbris-stellar text-[9px] mb-1">
+            cycles run
+          </p>
+          <p className="umbris-mono text-umbris-lunar text-sm tabular-nums">
+            {String(totalCycles).padStart(4, "0")}
+          </p>
+        </div>
+
+        {commitShort && (
+          <>
+            <div className="w-px h-12 bg-umbris-grey/30 hidden md:block" />
+            <div>
+              <p className="umbris-eyebrow text-umbris-stellar text-[9px] mb-1">
+                commit
+              </p>
+              <a
+                href={`${repoBase}/commit/${latest.commit_hash}`}
+                target="_blank"
+                rel="noreferrer"
+                className="umbris-mono text-umbris-corona text-sm hover:text-umbris-lunar transition-colors tabular-nums"
+                title={latest.commit_hash ?? ""}
+              >
+                {commitShort}
+              </a>
+            </div>
+          </>
+        )}
       </div>
 
-      <div className="text-right">
+      <div className="text-right flex flex-col items-end gap-1.5">
+        {/* LIVE pill · pulses each time fresh content lands; turns
+            stellar when the connection has been silent for more than
+            2× the poll interval. */}
+        <div className="flex items-center gap-2">
+          <span
+            className={`inline-block w-1.5 h-1.5 rounded-full ${
+              live
+                ? freshFlash
+                  ? "bg-umbris-corona animate-umbris-heartbeat"
+                  : "bg-umbris-violet animate-umbris-heartbeat"
+                : "bg-umbris-stellar/50"
+            }`}
+            aria-hidden
+          />
+          <span
+            className={`umbris-mono text-[10px] uppercase tracking-widest ${
+              live
+                ? freshFlash
+                  ? "text-umbris-corona"
+                  : "text-umbris-violet"
+                : "text-umbris-stellar"
+            }`}
+          >
+            {live ? (freshFlash ? "fresh data" : "live") : "stale · retrying"}
+          </span>
+          {nextPollSec != null && live && (
+            <span className="umbris-mono text-umbris-grey text-[10px] uppercase tracking-widest tabular-nums">
+              · next in {nextPollSec}s
+            </span>
+          )}
+        </div>
+
         {isHistorical && (
-          <p className="umbris-mono text-umbris-corona text-[10px] uppercase tracking-widest mb-1">
+          <p className="umbris-mono text-umbris-corona text-[10px] uppercase tracking-widest">
             · viewing a historical cycle ·
           </p>
         )}
+
         <p className="umbris-mono text-umbris-grey text-[10px] uppercase tracking-widest">
-          manifest updated · {formatUpdatedAt(updatedAt)}
+          manifest written · {formatUpdatedAt(updatedAt)}
         </p>
       </div>
     </div>
@@ -651,76 +788,189 @@ function Badge({
 
 interface RecentSidebarProps {
   recent: ManifestRecent[];
+  latest: ManifestLatest;
   selectedCycle: number;
   latestCycle: number;
+  repoBase: string;
   onSelect: (cycle: number) => void;
 }
 
 function RecentSidebar({
   recent,
+  latest,
   selectedCycle,
   latestCycle,
+  repoBase,
   onSelect,
 }: RecentSidebarProps) {
-  const shown = recent.slice(0, 8);
+  // Merge `latest` into the list so the active cycle's commit hash +
+  // cost are visible without waiting for the next manifest write.
+  // Newest-first, deduped by cycle number.
+  const merged: ManifestRecent[] = useMemo(() => {
+    const byCycle = new Map<number, ManifestRecent>();
+    for (const r of recent) {
+      byCycle.set(r.cycle, r);
+    }
+    byCycle.set(latest.cycle, {
+      file: latest.file,
+      cycle: latest.cycle,
+      status: latest.status,
+      started_at: latest.started_at,
+      verdict: latest.verdict,
+      finished_at: latest.finished_at,
+      cost_usd: latest.cost_usd,
+      commit_hash: latest.commit_hash,
+    });
+    return Array.from(byCycle.values()).sort((a, b) => b.cycle - a.cycle);
+  }, [recent, latest]);
+
+  const finishedCount = merged.filter(
+    (r) => !isDeliberating(r.status),
+  ).length;
+
   return (
-    <aside className="border border-umbris-grey/40 bg-umbris-void/80 p-5 h-fit">
-      <p className="umbris-eyebrow text-umbris-violet text-[10px] mb-4">
-        · recent cycles ·
-      </p>
-      <ul className="space-y-2">
-        {shown.map((r) => {
-          const active = r.cycle === selectedCycle;
-          const isLatest = r.cycle === latestCycle;
-          return (
-            <li key={r.cycle}>
-              <button
-                type="button"
-                onClick={() => onSelect(r.cycle)}
-                className={`w-full text-left border px-3 py-2.5 transition-colors ${
-                  active
-                    ? "border-umbris-violet/70 bg-umbris-violet/[0.05]"
-                    : "border-umbris-grey/30 hover:border-umbris-lunar/50"
-                }`}
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <span
-                    className={`umbris-mono text-[11px] tabular-nums ${
-                      active ? "text-umbris-violet" : "text-umbris-lunar"
-                    }`}
-                  >
-                    cycle {String(r.cycle).padStart(4, "0")}
-                  </span>
-                  {isLatest && (
-                    <span className="umbris-mono text-umbris-corona text-[8px] uppercase tracking-widest">
-                      · latest
-                    </span>
-                  )}
-                </div>
-                <span
-                  className={`umbris-mono text-[9px] uppercase tracking-widest ${
-                    active ? "text-umbris-violet" : "text-umbris-stellar"
+    <aside className="border border-umbris-grey/40 bg-umbris-void/80 p-5 h-fit lg:sticky lg:top-24">
+      <div className="flex items-center justify-between mb-4">
+        <p className="umbris-eyebrow text-umbris-violet text-[10px]">
+          · the cycle log ·
+        </p>
+        <span className="umbris-mono text-umbris-stellar text-[9px] uppercase tracking-widest tabular-nums">
+          {finishedCount} finished
+        </span>
+      </div>
+
+      {merged.length === 0 ? (
+        <p className="umbris-serif italic text-umbris-grey text-xs">
+          no cycles yet · the convocation has not yet stirred
+        </p>
+      ) : (
+        <ul className="space-y-2 max-h-[640px] overflow-y-auto pr-1 -mr-1">
+          {merged.map((r) => {
+            const active = r.cycle === selectedCycle;
+            const isLatest = r.cycle === latestCycle;
+            const deliberating = isDeliberating(r.status);
+            const shortHash = r.commit_hash
+              ? r.commit_hash.slice(0, 7)
+              : null;
+            return (
+              <li key={r.cycle}>
+                <div
+                  className={`border transition-colors ${
+                    active
+                      ? "border-umbris-violet/70 bg-umbris-violet/[0.06]"
+                      : "border-umbris-grey/30 hover:border-umbris-lunar/50"
                   }`}
                 >
-                  · {statusLabel(r.status)} ·
-                </span>
-                {r.verdict && (
-                  <p className="umbris-serif italic text-umbris-stellar text-[11px] leading-snug mt-1.5 line-clamp-2">
-                    {truncate(r.verdict, 90)}
-                  </p>
-                )}
-              </button>
-            </li>
-          );
-        })}
-        {shown.length === 0 && (
-          <li className="umbris-serif italic text-umbris-grey text-xs">
-            no prior cycles yet
-          </li>
-        )}
-      </ul>
+                  <button
+                    type="button"
+                    onClick={() => onSelect(r.cycle)}
+                    className="w-full text-left px-3 pt-2.5 pb-2"
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span
+                        className={`umbris-mono text-[11px] tabular-nums ${
+                          active
+                            ? "text-umbris-violet"
+                            : "text-umbris-lunar"
+                        }`}
+                      >
+                        cycle {String(r.cycle).padStart(4, "0")}
+                      </span>
+                      {isLatest && (
+                        <span
+                          className={`umbris-mono text-[8px] uppercase tracking-widest ${
+                            deliberating
+                              ? "text-umbris-violet animate-umbris-heartbeat"
+                              : "text-umbris-corona"
+                          }`}
+                        >
+                          · {deliberating ? "live" : "latest"}
+                        </span>
+                      )}
+                    </div>
+                    <span
+                      className={`umbris-mono text-[9px] uppercase tracking-widest ${
+                        active
+                          ? "text-umbris-violet"
+                          : statusColorTextClass(r.status)
+                      }`}
+                    >
+                      · {statusLabel(r.status)} ·
+                    </span>
+                    {r.verdict && (
+                      <p className="umbris-serif italic text-umbris-stellar text-[11px] leading-snug mt-1.5 line-clamp-2">
+                        {truncate(r.verdict, 90)}
+                      </p>
+                    )}
+                    {(typeof r.cost_usd === "number" || r.finished_at) && (
+                      <p className="umbris-mono text-umbris-grey text-[9px] uppercase tracking-widest mt-1.5 tabular-nums">
+                        {typeof r.cost_usd === "number" && (
+                          <>· ${r.cost_usd.toFixed(4)} </>
+                        )}
+                        {r.finished_at && (
+                          <>· {formatShortDate(r.finished_at)} </>
+                        )}
+                      </p>
+                    )}
+                  </button>
+
+                  {/* Commit / file links · only shown if the daemon
+                      surfaced them. */}
+                  {(shortHash || r.file) && (
+                    <div className="px-3 pb-2.5 flex flex-wrap items-center gap-3">
+                      {shortHash && (
+                        <a
+                          href={`${repoBase}/commit/${r.commit_hash}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="umbris-mono text-umbris-corona text-[9px] uppercase tracking-widest hover:text-umbris-lunar transition-colors tabular-nums"
+                          title={r.commit_hash ?? ""}
+                        >
+                          ↳ {shortHash}
+                        </a>
+                      )}
+                      {r.file && (
+                        <a
+                          href={`${repoBase}/blob/main/${r.file}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="umbris-mono text-umbris-stellar text-[9px] uppercase tracking-widest hover:text-umbris-lunar transition-colors"
+                        >
+                          transcript →
+                        </a>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </aside>
   );
+}
+
+// Helpers used by the sidebar · separated so the main component stays
+// readable. `statusColorTextClass` is the text-only variant of
+// `statusColorClass` (no border classes).
+function statusColorTextClass(status: string): string {
+  const s = statusLabel(status);
+  if (s === "shipped") return "text-umbris-corona";
+  if (s === "failed") return "text-umbris-error";
+  if (s === "in deliberation") return "text-umbris-violet";
+  return "text-umbris-stellar";
+}
+
+function formatShortDate(iso: string): string {
+  try {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return iso;
+    // YYYY-MM-DD HH:MM (UTC)
+    return d.toISOString().replace("T", " ").slice(0, 16);
+  } catch {
+    return iso;
+  }
 }
 
 // ──────────────────────────────────────────────────────────────────

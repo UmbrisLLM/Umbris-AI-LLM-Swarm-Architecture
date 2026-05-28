@@ -19,8 +19,11 @@ cycle from completing.
 
 In addition to the per-cycle markdown, this module maintains a rolling
 `manifest.json` alongside the transcripts. The manifest is what
-umbrisai.com/convocation polls every 30s to render the live feed · it
-exposes the latest cycle's voices plus a short tail of recent cycles.
+umbrisai.com/convocation polls every 20s (via a Vercel edge proxy that
+bypasses GitHub raw's 5-minute CDN cache) to render the live feed. It
+exposes the latest cycle's voices plus a rolling tail of every recent
+cycle (cycle number, status, verdict, cost, commit hash) so the
+sidebar on the live page can render the full cycle log.
 """
 
 from __future__ import annotations
@@ -385,12 +388,19 @@ def _update_manifest(
         "voices": voices,
     }
 
+    # The recent entry carries enough metadata that the sidebar on
+    # umbrisai.com/convocation can render every finished cycle with
+    # status, cost, finish time and a click-through to the commit ·
+    # without us having to load each transcript file.
     recent_entry = {
         "file": transcript_file,
         "cycle": cycle_number,
         "status": status,
         "started_at": started_iso,
+        "finished_at": finished_iso,
         "verdict": _truncate((verdict_text or "").strip(), 280),
+        "cost_usd": float(cost_usd or 0.0),
+        "commit_hash": commit_hash,
     }
 
     # Load any existing manifest so we can append to `recent`.
