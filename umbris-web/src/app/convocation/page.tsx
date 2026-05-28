@@ -1182,12 +1182,29 @@ function CadenceNotice({
     const diffMs = nextCycleAt - now;
     if (diffMs <= 0) {
       const lateMin = Math.floor(-diffMs / 60_000);
+      // Honest scale · a tiny overdue is mid-cycle, a medium overdue
+      // is the convocation working a hard problem, a large overdue
+      // means something is wrong and the daemon needs attention.
       if (lateMin < 1) {
         countdown = "the next cycle is due any moment";
         countdownTone = "corona";
-      } else {
-        countdown = `next cycle is overdue by ${lateMin}m · likely deliberating now`;
+      } else if (lateMin < 20) {
+        countdown = `${lateMin}m late · likely mid-deliberation`;
         countdownTone = "corona";
+      } else if (lateMin < 60) {
+        countdown = `${lateMin}m late · convocation may be working a hard problem`;
+        countdownTone = "corona";
+      } else {
+        // Past one full extra cycle late · this is no longer normal.
+        // Be honest about it.
+        const lateHours = Math.floor(lateMin / 60);
+        const lateRem = lateMin % 60;
+        const lateText =
+          lateHours >= 1
+            ? `${lateHours}h ${lateRem.toString().padStart(2, "0")}m`
+            : `${lateMin}m`;
+        countdown = `paused ${lateText} · the daemon may need attention`;
+        countdownTone = "stellar";
       }
     } else {
       const totalSec = Math.ceil(diffMs / 1000);

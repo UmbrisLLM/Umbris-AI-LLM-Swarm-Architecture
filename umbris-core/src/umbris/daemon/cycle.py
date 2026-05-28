@@ -268,6 +268,22 @@ async def run_cycle(
             # Best-effort · never let progress writes break the cycle.
             return
 
+    # Write a "cycle has started" manifest entry IMMEDIATELY so the
+    # page flips from the previous cycle's final state to "cycle N · in
+    # deliberation" the instant a new cycle begins, instead of staying
+    # frozen on the previous shipped cycle until the first progress
+    # tick (8s later) or the cycle completes.
+    try:
+        await write_progress_manifest(
+            repo_root=config.repo_root,
+            cycle_number=config.cycle_number,
+            started_iso=started_iso,
+            records=[],
+            cost_so_far=0.0,
+        )
+    except Exception:
+        pass
+
     progress_task = asyncio.create_task(_progress_writer())
 
     try:

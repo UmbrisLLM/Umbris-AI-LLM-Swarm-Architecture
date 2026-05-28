@@ -103,12 +103,25 @@ export function NineSpeakHero() {
       const diffMs = anchorMs + CYCLE_INTERVAL_MS - now;
       if (diffMs <= 0) {
         const lateMin = Math.floor(-diffMs / 60_000);
+        // Honest scale · small late = mid-cycle, medium late = working
+        // a hard problem, big late = daemon paused / needs attention.
         if (lateMin < 1) {
           nextCycleLabel = "due any moment";
           nextCycleTone = "corona";
-        } else {
-          nextCycleLabel = `${lateMin}m overdue`;
+        } else if (lateMin < 20) {
+          nextCycleLabel = `${lateMin}m late`;
           nextCycleTone = "corona";
+        } else if (lateMin < 60) {
+          nextCycleLabel = `${lateMin}m late · working it`;
+          nextCycleTone = "corona";
+        } else {
+          const lateH = Math.floor(lateMin / 60);
+          const lateR = lateMin % 60;
+          nextCycleLabel =
+            lateH >= 1
+              ? `paused ${lateH}h ${lateR.toString().padStart(2, "0")}m`
+              : `paused ${lateMin}m`;
+          nextCycleTone = "lunar";
         }
       } else {
         const totalSec = Math.ceil(diffMs / 1000);
