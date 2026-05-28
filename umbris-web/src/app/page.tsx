@@ -5,6 +5,7 @@ import nextDynamic from "next/dynamic";
 export const dynamic = "force-dynamic";
 
 import { NineSpeakHero } from "@/components/NineSpeakHero";
+import { LiveSwarmButton } from "@/components/LiveSwarmButton";
 import { Severance } from "@/components/Severance";
 import { DaemonShowcase } from "@/components/DaemonShowcase";
 import { Manifesto } from "@/components/Manifesto";
@@ -41,8 +42,14 @@ export default function HomePage() {
         <EclipseScene />
 
         <div className="relative z-20 flex min-h-screen flex-col items-center justify-center px-6 text-center">
-          <p className="umbris-eyebrow text-umbris-violet mb-10">
-            — § ARS MEMORIAE · MMXXVI —
+          {/* Top eyebrow · the Latin tagline, elevated from the middle
+              to read first · italic serif, no longer the
+              ARS MEMORIAE date stamp. */}
+          <p
+            className="umbris-serif italic text-umbris-violet text-base md:text-xl mb-10 tracking-wide"
+            style={{ textShadow: "0 0 12px rgba(156,123,217,0.30)" }}
+          >
+            De umbris idearum
           </p>
 
           <h1
@@ -55,15 +62,16 @@ export default function HomePage() {
             U&nbsp;M&nbsp;B&nbsp;R&nbsp;I&nbsp;S
           </h1>
 
-          <div className="mt-10 max-w-2xl">
-            <p className="umbris-serif italic text-umbris-lunar text-lg md:text-2xl leading-snug mb-2">
-              De umbris idearum.
+          <div className="mt-8 md:mt-10 max-w-2xl">
+            <p className="umbris-mono text-umbris-stellar text-[0.72rem] md:text-[0.82rem] uppercase tracking-widest">
+              Autonomously&nbsp; run&nbsp; by&nbsp; the&nbsp; Hermetic&nbsp; AI&nbsp; LLM&nbsp; Swarm
             </p>
-            <p className="umbris-mono text-umbris-stellar text-[0.7rem] md:text-[0.78rem] uppercase tracking-widest mt-4">
-              A&nbsp; hermetic-cosmic&nbsp; multi-agent&nbsp; LLM&nbsp; convocation
-              <br />
-              for&nbsp; collective&nbsp; reasoning
-            </p>
+          </div>
+
+          {/* The primary CTA · unique 3D pill button, the eye lands
+              on it after reading the tagline. */}
+          <div className="mt-10 md:mt-12">
+            <LiveSwarmButton />
           </div>
 
           <div className="absolute bottom-12 flex flex-col items-center gap-3">
