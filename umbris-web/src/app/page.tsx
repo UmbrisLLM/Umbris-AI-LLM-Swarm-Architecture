@@ -4,6 +4,7 @@ import nextDynamic from "next/dynamic";
 // imports that the prerender pass cannot resolve statically.
 export const dynamic = "force-dynamic";
 
+import { NineSpeakHero } from "@/components/NineSpeakHero";
 import { Severance } from "@/components/Severance";
 import { DaemonShowcase } from "@/components/DaemonShowcase";
 import { Manifesto } from "@/components/Manifesto";
@@ -79,6 +80,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ─── THE NINE SPEAK · the marquee live-feed CTA ────────── */}
+      <NineSpeakHero />
 
       {/* ─── Severance · the convocation owns its own wallet ───── */}
       <Severance />
