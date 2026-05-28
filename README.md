@@ -19,6 +19,16 @@
 
 ---
 
+> ### 🌑 **v1.1 · The Convocation Takes the Wheel**
+>
+> **The nine-agent LLM swarm is now autonomously building this repository.** It cycles every 20 minutes, scans for bottlenecks, deliberates among the nine planets, falsifies its own proposals, and commits surviving patches to `main`. **You can watch it think in real time at [umbrisai.com/convocation](https://umbrisai.com/convocation)** · the conversation streams live as it happens, written by the convocation itself.
+>
+> **The whole engine is MIT open-source.** Five commands and you have your own nine-agent convocation running locally. Point it at *your* repository · the same Custos sentinel that runs UMBRIS will run yours.
+>
+> 📜 **Full announcement:** [`ANNOUNCEMENT.md`](ANNOUNCEMENT.md)
+
+---
+
 ## **UMBRIS is not a model. It is a convocation.**
 
 Nine planetary intelligences argue on a shared substrate. Weighted consensus surfaces a candidate vision. Saturnus attempts to falsify it before it ships. The output is a *verified vision* with confidence, cost in USD, and a full provenance trail · not a confident-sounding sentence from a single mind.
