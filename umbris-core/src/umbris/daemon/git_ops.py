@@ -52,7 +52,10 @@ def _run(args: list[str], cwd: Path, *, timeout: int = 60) -> GitResult:
 
 
 def status_porcelain(repo: Path) -> GitResult:
-    return _run(["git", "status", "--porcelain"], cwd=repo)
+    # Lock the format to v1 explicitly · the bare `--porcelain` flag is
+    # an alias for v1 today, but pinning protects against future Git
+    # versions that might re-alias it.
+    return _run(["git", "status", "--porcelain=v1"], cwd=repo)
 
 
 def has_uncommitted_changes(repo: Path) -> bool:
@@ -64,14 +67,49 @@ def diff_stat(repo: Path) -> GitResult:
 
 
 def changed_files(repo: Path) -> list[str]:
-    """Files modified relative to HEAD (staged + unstaged + untracked)."""
+    """Files modified relative to HEAD (staged + unstaged + untracked).
+
+    Robust to all v1 porcelain line shapes:
+      * "XY PATH"               · the standard 3-char prefix
+      * "XY ORIG -> PATH"       · renames / copies
+      * "?? PATH"               · untracked
+      * "\"PATH WITH SPACE\""   · git's double-quote escaping for
+                                  paths containing unusual characters
+
+    Previously this used the naive `line[3:]` slice, which mangled the
+    first byte of every path the moment Git printed a line with only
+    2 status chars (no trailing space) · that ate the `l` in `lore/`
+    and made `git add` fail with "pathspec 'ore/...' did not match."
+    """
     res = status_porcelain(repo)
     if not res.ok:
         return []
     out: list[str] = []
-    for line in res.stdout.splitlines():
-        if len(line) > 3:
-            out.append(line[3:].strip())
+    for raw in res.stdout.splitlines():
+        if not raw or not raw.strip():
+            continue
+        # The first two characters are the status code (X and Y).
+        # Anything past them, with leading whitespace stripped, is the
+        # path. We use lstrip(" ") rather than a fixed slice so a
+        # missing separator never eats the first byte of the filename.
+        if len(raw) < 3:
+            continue
+        path = raw[2:].lstrip(" ")
+        if not path:
+            continue
+        # For renames/copies the path is "origin -> destination". Take
+        # the destination · that's what landed on disk and what we want
+        # to add.
+        if " -> " in path:
+            path = path.split(" -> ", 1)[1]
+        # Git quotes paths with unusual characters · strip the quotes.
+        # We don't decode the C-string escapes inside because we never
+        # write paths with such characters from the daemon side.
+        if len(path) >= 2 and path.startswith('"') and path.endswith('"'):
+            path = path[1:-1]
+        path = path.strip()
+        if path:
+            out.append(path)
     return out
 
 
