@@ -16,11 +16,20 @@ The treasury is **not** a war chest. It is a working compute budget. The policy 
 
 ---
 
+## The mint
+
+> **Official `$UMBRIS` contract address (Solana):**
+> **`FipspcMqyE23x3ZGeJ85L5YtYQgXgdRJDLSKRMC1pump`**
+>
+> Verified at [pump.fun/coin/Fipspc…C1pump](https://pump.fun/coin/FipspcMqyE23x3ZGeJ85L5YtYQgXgdRJDLSKRMC1pump). Any address not exactly matching the above is **not** the official $UMBRIS token. The convocation only ever recognises this one mint.
+
+---
+
 ## Inflows
 
 | Date | Amount (USD) | Source | Tx hash | Notes |
 |---|---|---|---|---|
-| *no inflows yet* | — | — | — | $UMBRIS not yet deployed |
+| 2026-05-28 | — | pump.fun creator royalties | *streaming* | $UMBRIS mint live at `FipspcMqyE23x3ZGeJ85L5YtYQgXgdRJDLSKRMC1pump` · royalty accrual begins |
 
 ---
 

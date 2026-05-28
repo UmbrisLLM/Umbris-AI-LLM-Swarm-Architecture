@@ -11,9 +11,9 @@
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-9C7BD9.svg?style=flat-square)](LICENSE)
 [![Brand: Eclipse](https://img.shields.io/badge/brand-eclipse-9C7BD9?style=flat-square)](brand/)
-[![Predecessor: OPUS](https://img.shields.io/badge/predecessor-OPUS-DCDEE7?style=flat-square)](https://github.com/0pusAI/Opus-Agent-Swarm-LLM-Framework)
 [![Website](https://img.shields.io/badge/site-umbrisai.com-9C7BD9.svg?style=flat-square)](https://umbrisai.com)
 [![Engine](https://img.shields.io/badge/umbris--core-v1.1-9C7BD9.svg?style=flat-square)](umbris-core/)
+[![Token](https://img.shields.io/badge/%24UMBRIS-Solana-FAE6B0?style=flat-square)](https://pump.fun/coin/FipspcMqyE23x3ZGeJ85L5YtYQgXgdRJDLSKRMC1pump)
 
 </div>
 
@@ -23,7 +23,7 @@
 
 Nine planetary intelligences argue on a shared substrate. Weighted consensus surfaces a candidate vision. Saturnus attempts to falsify it before it ships. The output is a *verified vision* with confidence, cost in USD, and a full provenance trail · not a confident-sounding sentence from a single mind.
 
-UMBRIS extends the lineage that [OPUS](https://github.com/0pusAI/Opus-Agent-Swarm-LLM-Framework) opened. **Where OPUS reads the Llullian tradition, UMBRIS reads the Brunonian extension. Same architectural genealogy. Different philosophical era.** Bruno explicitly extended Llull's wheels with planetary correspondences, hermetic seals, and the doctrine that ideas are shadows only triangulation across many can resolve. UMBRIS reads that extension computationally.
+UMBRIS reads the Brunonian tradition computationally. Bruno explicitly extended Llull's wheels with planetary correspondences, hermetic seals, and the doctrine that ideas are shadows only triangulation across many can resolve. UMBRIS implements that doctrine in code.
 
 ---
 
@@ -260,7 +260,7 @@ umbris custos --interval 20m --cost-cap-per-cycle 2 --cost-cap-per-day 30
 umbris custos-status --repo .
 ```
 
-Full operator guide at [`docs/custos.md`](docs/custos.md). The Custos is the UMBRIS equivalent of OPUS's Vigilia · same lineage, same safety gates, same public-cadence philosophy.
+Full operator guide at [`docs/custos.md`](docs/custos.md).
 
 ---
 
@@ -302,11 +302,25 @@ This is not a metaphor · every revolution in [`lore/revolutions/`](lore/revolut
 
 ## **The token · $UMBRIS**
 
-Solana mint, to be deployed at launch. Public treasury at [`treasury-log.md`](treasury-log.md). Tokenomics policy at [`docs/tokenomics.md`](docs/tokenomics.md) · creator royalties feed a public treasury spent only on compute, models, and infrastructure.
+> **Official mint (Solana):** **`FipspcMqyE23x3ZGeJ85L5YtYQgXgdRJDLSKRMC1pump`**
+>
+> Verified at [pump.fun/coin/Fipspc…C1pump](https://pump.fun/coin/FipspcMqyE23x3ZGeJ85L5YtYQgXgdRJDLSKRMC1pump). Any address that is not exactly the string above is **not** the official $UMBRIS token.
 
-**Utility:** holding $UMBRIS unlocks the full UMBRIS Studio software key · the features that let you compose and run your own convocation to its fullest. Holders may stake into the convocation's ecosystem and receive a 1× return of yield while their tokens fund compute.
+`$UMBRIS` is the token that funds the convocation. Pump.fun creator royalties flow into a public treasury · [`treasury-log.md`](treasury-log.md) · spent only on compute, hosting, and $UMBRIS buybacks the convocation itself decides.
 
-The loop is closed and visible · tokens fund compute, compute makes the convocation more luminous, the convocation makes the instrument more valuable to the people who hold it. **Both grow together, or neither grows.**
+Every Sunday at 18:00 UTC the Custos casts **the treasury question** · a special revolution where the nine planets read the treasury balance, the week's compute spend, and the 24h volume, then surface one of three verdicts:
+
+- **`hold`** · runway under 4 weeks · no buyback, funds reserved for compute
+- **`small buyback`** · runway over 4 weeks · buy `min(0.5 SOL, 10% surplus)` of $UMBRIS on the open market
+- **`patient burn`** · runway over 12 weeks · buy + burn `min(1 SOL, 15% surplus)` · supply contracts
+
+The verdict is committed as a public revolution. Every dollar in, every dollar out, every buyback the convocation chose to make · all on GitHub, all on chain.
+
+**Utility:** holding $UMBRIS unlocks the Patron tier of UMBRIS Studio · the hosted endpoint at `api.umbrisai.com`, larger model contexts, the Custos-as-a-service for your own repo. Open tier (run locally with your own key) stays free forever.
+
+**The loop is closed and visible** · tokens fund compute, compute makes the convocation more luminous, luminosity makes the instrument more valuable to the people who hold it. **Both grow together, or neither grows.**
+
+Full tokenomics doc at [`docs/tokenomics.md`](docs/tokenomics.md).
 
 ---
 
@@ -321,10 +335,18 @@ What v1.1 ships (this release):
 - The Custos daemon (create-only patches)
 - The design system as a published workspace
 
+What v1.1.x adds (shipped after this release):
+
+- ✅ `$UMBRIS` Solana mint is **live** · `FipspcMqyE23x3ZGeJ85L5YtYQgXgdRJDLSKRMC1pump`
+- ✅ Voice + personality system · each of the nine planets speaks in a distinct register
+- ✅ Per-cycle markdown transcripts auto-written to `lore/revolutions/auto/`
+- ✅ Live convocation feed at [umbrisai.com/convocation](https://umbrisai.com/convocation)
+- ✅ Custos Console · a one-click desktop launcher (`umbris-core/console/`)
+
 What v1.2 adds:
 
-- $UMBRIS Solana mint + treasury wiring
 - The Custos graduates from create-only to full-file-edit
+- Autonomous treasury buybacks within a hardcoded daily cap
 - Hosted API at `api.umbrisai.com`
 - Cross-platform signed Studio installers (Windows .msi, macOS .dmg, Linux .AppImage)
 - Native UMBRIS Eclipse icon set replacing the placeholder Tauri icons
@@ -353,8 +375,7 @@ The contribution model follows the doctrine: do not write features, **cast quest
 *From shadows into light. Slowly, but in public.*
 
 [the doctrine of how](lore/compositione/) &nbsp;·&nbsp;
-[the doctrine of why](lore/triplici-minimo/) &nbsp;·&nbsp;
-[the lineage UMBRIS extends · OPUS](https://github.com/0pusAI/Opus-Agent-Swarm-LLM-Framework)
+[the doctrine of why](lore/triplici-minimo/)
 
 *Magnum Opus · MMXXVI*
 
