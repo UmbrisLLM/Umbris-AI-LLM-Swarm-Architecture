@@ -21,10 +21,25 @@ interface ManifestSnapshot {
     cycle: number;
     status: string;
     cost_usd: number;
+    started_at?: string;
+    finished_at?: string | null;
     voices?: { length?: number } | unknown[];
   };
-  recent?: { cycle: number }[];
+  recent?: ManifestRecentEntry[];
 }
+
+interface ManifestRecentEntry {
+  cycle: number;
+  status?: string;
+  started_at?: string;
+  finished_at?: string | null;
+  cost_usd?: number;
+  wall_seconds?: number;
+}
+
+// The daemon's --interval flag. Used to predict when the next cycle
+// will ship · keeps the page visibly counting down between cycles.
+const CYCLE_INTERVAL_MS = 20 * 60 * 1000;
 
 export function NineSpeakHero() {
   const [snap, setSnap] = useState<ManifestSnapshot | null>(null);
@@ -62,13 +77,79 @@ export function NineSpeakHero() {
     ? Math.max(snap.latest.cycle, snap.recent?.length ?? 0)
     : null;
   const cost = snap?.latest.cost_usd;
-  const updatedAgo = snap ? formatAgo(snap.updated_at, now) : null;
 
   const deliberating = status
     ? ["running", "in_progress", "deliberating"].includes(
         status.toLowerCase(),
       )
     : false;
+
+  // ─── Next-cycle countdown ─────────────────────────────────────
+  // Anchor on whichever timestamp is most recent · finished_at if the
+  // cycle is done, started_at if it's still deliberating, manifest
+  // updated_at as the final fallback. Add 20 min and tick down.
+  const anchorIso =
+    snap?.latest.finished_at ||
+    snap?.latest.started_at ||
+    snap?.updated_at;
+  let nextCycleLabel = "·";
+  let nextCycleTone: "violet" | "corona" | "lunar" = "violet";
+  if (deliberating) {
+    nextCycleLabel = "deliberating now";
+    nextCycleTone = "corona";
+  } else if (anchorIso) {
+    const anchorMs = new Date(anchorIso).getTime();
+    if (Number.isFinite(anchorMs)) {
+      const diffMs = anchorMs + CYCLE_INTERVAL_MS - now;
+      if (diffMs <= 0) {
+        const lateMin = Math.floor(-diffMs / 60_000);
+        if (lateMin < 1) {
+          nextCycleLabel = "due any moment";
+          nextCycleTone = "corona";
+        } else {
+          nextCycleLabel = `${lateMin}m overdue`;
+          nextCycleTone = "corona";
+        }
+      } else {
+        const totalSec = Math.ceil(diffMs / 1000);
+        const m = Math.floor(totalSec / 60);
+        const s = totalSec % 60;
+        nextCycleLabel =
+          m >= 1
+            ? `~${m}m ${s.toString().padStart(2, "0")}s`
+            : `~${s}s`;
+        nextCycleTone = "violet";
+      }
+    }
+  }
+
+  // ─── Per-cycle wall time ──────────────────────────────────────
+  // The duration of the most recent finished cycle, plus an average
+  // across all finished cycles in the manifest tail. Both render below
+  // the stat strip so viewers know what "one cycle" actually costs in
+  // wall time.
+  const finishedCycles: ManifestRecentEntry[] = (snap?.recent ?? [])
+    .filter((r) => {
+      const s = (r.status || "").toLowerCase();
+      return s !== "running" && s !== "in_progress" && s !== "deliberating";
+    });
+
+  const lastCycleSeconds = computeCycleSeconds(
+    snap?.latest.started_at,
+    snap?.latest.finished_at,
+    finishedCycles[0]?.wall_seconds,
+  );
+
+  let avgCycleSeconds: number | null = null;
+  const allDurations: number[] = [];
+  for (const r of finishedCycles) {
+    const s = computeCycleSeconds(r.started_at, r.finished_at, r.wall_seconds);
+    if (s != null) allDurations.push(s);
+  }
+  if (allDurations.length > 0) {
+    avgCycleSeconds =
+      allDurations.reduce((a, b) => a + b, 0) / allDurations.length;
+  }
 
   return (
     <section
@@ -163,17 +244,35 @@ export function NineSpeakHero() {
                 value={padCycle(totalCycles ?? undefined)}
                 tone="lunar"
               />
+              {/* NEXT CYCLE · live countdown that ticks every second.
+                  This is what makes the strip never read as static
+                  between cycles. */}
               <Stat
-                label="updated"
-                value={updatedAgo ?? "·"}
-                tone="stellar"
+                label="next cycle"
+                value={nextCycleLabel}
+                tone={nextCycleTone}
+                pulse={nextCycleTone === "corona"}
               />
             </div>
-            {typeof cost === "number" && (
-              <p className="umbris-mono text-umbris-grey text-[10px] uppercase tracking-widest text-center mt-4 tabular-nums">
-                · last cycle spent ${cost.toFixed(4)} on the convocation ·
-              </p>
-            )}
+
+            {/* Per-cycle duration · last and average. Renders directly
+                below the strip so the reader knows what "one cycle"
+                costs in wall-time as well as dollars. */}
+            <p className="umbris-mono text-umbris-grey text-[10px] uppercase tracking-widest text-center mt-4 tabular-nums">
+              {lastCycleSeconds != null && (
+                <>· last cycle ran {formatDuration(lastCycleSeconds)} </>
+              )}
+              {typeof cost === "number" && (
+                <>· spent ${cost.toFixed(4)} </>
+              )}
+              {avgCycleSeconds != null && allDurations.length >= 2 && (
+                <>
+                  · avg {formatDuration(avgCycleSeconds)} across{" "}
+                  {allDurations.length} cycles{" "}
+                </>
+              )}
+              ·
+            </p>
           </motion.div>
         )}
 
@@ -272,4 +371,41 @@ function formatAgo(iso: string, now: number): string {
   } catch {
     return "·";
   }
+}
+
+/**
+ * Resolve a cycle's duration in seconds. Prefer the daemon-supplied
+ * `wall_seconds` when available; otherwise compute from started/finished
+ * timestamps. Returns null when there's not enough data.
+ */
+function computeCycleSeconds(
+  started: string | null | undefined,
+  finished: string | null | undefined,
+  wallSeconds: number | null | undefined,
+): number | null {
+  if (typeof wallSeconds === "number" && Number.isFinite(wallSeconds) && wallSeconds > 0) {
+    return wallSeconds;
+  }
+  if (!started || !finished) return null;
+  try {
+    const s = new Date(started).getTime();
+    const f = new Date(finished).getTime();
+    if (!Number.isFinite(s) || !Number.isFinite(f)) return null;
+    const diff = (f - s) / 1000;
+    return diff > 0 ? diff : null;
+  } catch {
+    return null;
+  }
+}
+
+function formatDuration(seconds: number): string {
+  if (seconds < 60) return `${Math.round(seconds)}s`;
+  if (seconds < 3600) {
+    const m = Math.floor(seconds / 60);
+    const s = Math.round(seconds % 60);
+    return `${m}m ${s.toString().padStart(2, "0")}s`;
+  }
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  return `${h}h ${m.toString().padStart(2, "0")}m`;
 }

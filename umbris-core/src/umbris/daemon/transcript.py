@@ -388,10 +388,20 @@ def _update_manifest(
         "voices": voices,
     }
 
+    # Compute the cycle's wall-time so the page can show how long each
+    # cycle actually took (no client-side parsing required).
+    wall_seconds: float | None = None
+    try:
+        s = datetime.fromisoformat(started_iso.replace("Z", "+00:00"))
+        f = datetime.fromisoformat(finished_iso.replace("Z", "+00:00"))
+        wall_seconds = max(0.0, (f - s).total_seconds())
+    except Exception:
+        wall_seconds = None
+
     # The recent entry carries enough metadata that the sidebar on
     # umbrisai.com/convocation can render every finished cycle with
-    # status, cost, finish time and a click-through to the commit ·
-    # without us having to load each transcript file.
+    # status, cost, finish time, wall duration and a click-through to
+    # the commit · without us having to load each transcript file.
     recent_entry = {
         "file": transcript_file,
         "cycle": cycle_number,
@@ -401,6 +411,7 @@ def _update_manifest(
         "verdict": _truncate((verdict_text or "").strip(), 280),
         "cost_usd": float(cost_usd or 0.0),
         "commit_hash": commit_hash,
+        "wall_seconds": wall_seconds,
     }
 
     # Load any existing manifest so we can append to `recent`.

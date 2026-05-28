@@ -96,6 +96,7 @@ interface ManifestRecent {
   finished_at?: string | null;
   cost_usd?: number;
   commit_hash?: string | null;
+  wall_seconds?: number | null;
 }
 
 interface Manifest {
@@ -889,6 +890,7 @@ function RecentSidebar({
       finished_at: latest.finished_at,
       cost_usd: latest.cost_usd,
       commit_hash: latest.commit_hash,
+      wall_seconds: computeWallSeconds(latest.started_at, latest.finished_at),
     });
     return Array.from(byCycle.values()).sort((a, b) => b.cycle - a.cycle);
   }, [recent, latest]);
@@ -971,8 +973,16 @@ function RecentSidebar({
                         {truncate(r.verdict, 90)}
                       </p>
                     )}
-                    {(typeof r.cost_usd === "number" || r.finished_at) && (
+                    {(typeof r.cost_usd === "number" ||
+                      r.finished_at ||
+                      typeof r.wall_seconds === "number") && (
                       <p className="umbris-mono text-umbris-grey text-[9px] uppercase tracking-widest mt-1.5 tabular-nums">
+                        {(() => {
+                          const dur = pickWallSeconds(r);
+                          return dur != null ? (
+                            <>· took {formatSidebarDuration(dur)} </>
+                          ) : null;
+                        })()}
                         {typeof r.cost_usd === "number" && (
                           <>· ${r.cost_usd.toFixed(4)} </>
                         )}
@@ -1040,6 +1050,50 @@ function formatShortDate(iso: string): string {
   } catch {
     return iso;
   }
+}
+
+/**
+ * Compute wall-time in seconds from two ISO timestamps. Used as a
+ * fallback when the daemon-supplied `wall_seconds` field is absent
+ * (older manifest entries).
+ */
+function computeWallSeconds(
+  started: string | null | undefined,
+  finished: string | null | undefined,
+): number | null {
+  if (!started || !finished) return null;
+  try {
+    const s = new Date(started).getTime();
+    const f = new Date(finished).getTime();
+    if (!Number.isFinite(s) || !Number.isFinite(f)) return null;
+    const diff = (f - s) / 1000;
+    return diff > 0 ? diff : null;
+  } catch {
+    return null;
+  }
+}
+
+function pickWallSeconds(r: ManifestRecent): number | null {
+  if (
+    typeof r.wall_seconds === "number" &&
+    Number.isFinite(r.wall_seconds) &&
+    r.wall_seconds > 0
+  ) {
+    return r.wall_seconds;
+  }
+  return computeWallSeconds(r.started_at, r.finished_at);
+}
+
+function formatSidebarDuration(seconds: number): string {
+  if (seconds < 60) return `${Math.round(seconds)}s`;
+  if (seconds < 3600) {
+    const m = Math.floor(seconds / 60);
+    const s = Math.round(seconds % 60);
+    return `${m}m ${s.toString().padStart(2, "0")}s`;
+  }
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  return `${h}h ${m.toString().padStart(2, "0")}m`;
 }
 
 // ──────────────────────────────────────────────────────────────────
