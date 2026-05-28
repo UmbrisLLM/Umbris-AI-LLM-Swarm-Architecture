@@ -1,15 +1,17 @@
 {
-  "updated_at": "2026-05-28T22:20:09+00:00",
+  "updated_at": "2026-05-28T23:02:01+00:00",
   "latest": {
-    "file": "",
+    "file": "2026-05-28T22-59-31Z_cycle-0001_ok.md",
     "cycle": 1,
-    "started_at": "2026-05-28T22:18:02+00:00",
-    "finished_at": "2026-05-28T22:18:02+00:00",
-    "status": "deliberating",
-    "reason": "convocation is speaking",
-    "verdict": "",
-    "cost_usd": 0.0,
-    "files_changed": [],
+    "started_at": "2026-05-28T22:59:31+00:00",
+    "finished_at": "2026-05-28T23:02:01+00:00",
+    "status": "ok",
+    "reason": "convocation shipped",
+    "verdict": "Drawing the threads · the convocation asked for the single highest-conviction next move, and the substrate has triangulated to a clear answer once Mars' critique is taken seriously. Mercurius (x3) converged on healing test_introspection.py as the precondition for everything else. Venus split the question two ways · venus_r01_00 argued the actuator (safety.py + apply.py) outranks the sensor because this is a self-modifying daemon, and venus_r01_01 proposed welding the inspector rewrite to a parametrised agent-contract test. Mars then did the work the rest of us skipped · noted that no planet has actually read lines 95–110, that a FIXME is not proof of runtime malfunction (the inspector did produce this scan, cleanly), and that venus_r01_01's leverage arithmetic depends on a matcher-rule change being introduced in the same commit that scores itself against it. Mars explicitly refused to attack venus_r01_00.\n\nHeld together, the highest-conviction next move is: write umbris-core/tests/test_safety.py, and in the same PR add a minimal test_apply.py that asserts apply.py refuses to mutate the repository when safety.py rejects. This is the actuator guard. Every other finding on the list is a correctness or hygiene risk; safety.py is the only one whose absence is a blast-radius risk in a daemon designed to commit its own patches (the daemon/ tree and examples/compositione_continuous.py confirm the self-application loop is real, not hypothetical). Concrete first change · open umbris-core/src/umbris/daemon/safety.py, enumerate its public predicates (path allowlist, diff-size cap, forbidden touches such as .git, secrets, CI config, anything outside the working tree), and write one accept-case plus one reject-case per predicate using the mock LLM provider so the tests are hermetic. Then in tests/test_apply.py, stub safety to return reject and assert that apply.py performs no filesystem write and returns a typed refusal · this proves the gate is wired, not merely present. Pin these as the canonical safety contract before the next self-application cycle runs.\n\nThe inspector cleanup (test_introspection.py lines 83, 93, 101, 102, 284) and the parametrised agent-contract test are both worth doing · but as concurrent hygiene, in separate PRs, after someone actually reads lines 95–110 and reports what the XXX demands. Mars' category-error point stands: we should not block the actuator behind a precondition we asserted but did not verify.\n\nFalsifiability for Saturnus · (1) safety.py exists and exposes at least three distinct rejection predicates suitable for unit testing; (2) apply.py imports safety and calls it before any write, so a mock-rejecting safety actually halts apply; (3) the test suite can run with the mock LLM provider without network or real git side effects. If any of these is false, the move escalates from 'write tests' to 'design-level safety review,' per venus_r01_00's own falsifier. Confidence 0.72.",
+    "cost_usd": 0.591113,
+    "files_changed": [
+      "lore/convocation-decisions/2025-verdict-actuator-guard.md"
+    ],
     "commit_hash": null,
     "voices": [
       {
@@ -23,7 +25,7 @@
         "model": null,
         "cost_usd": 0.0,
         "voice": "The convocation just scanned its own repository and surfaced the following observations (severity 1 = minor, 5 = urgent):\n\n  - [todo sev=4] umbris-core/tests/test_introspection.py:102: XXX: urgent rewrite\n  - [stale_link sev=3] lore/revolutions/2026-05-26_opening-the-convocation.md: broken link → \"../../brand/profile.png\"\n  - [test_gap sev=3] umbris-core/src/umbris/agents/base.py: module `base` h…",
-        "timestamp": "2026-05-28T22:18:09+00:00"
+        "timestamp": "2026-05-28T22:59:38+00:00"
       },
       {
         "role": "MERCURIUS",
@@ -34,9 +36,9 @@
         "type": "observation",
         "confidence": 0.87,
         "model": "claude-sonnet-4-6",
-        "cost_usd": 0.014963999999999998,
-        "voice": "What I notice first · the 33 test_gap items are noise masking signal. The one observation that cuts through: `test_introspection.py` is the only test file that exists, and it contains four flagged wounds including a sev=4 urgent rewrite at line 102. The convocation's sole test file is also its most broken one. That is not a test suite, that is a liability wearing a test suite's clothes.",
-        "timestamp": "2026-05-28T22:18:20+00:00"
+        "cost_usd": 0.017004000000000002,
+        "voice": "What I notice first · the test file that does exist, test_introspection.py, is itself riddled with FIXMEs and a sev=4 XXX at line 102. The convocation has one test file and it is broken. Everything else is absence; this is active rot in the only tissue you have.",
+        "timestamp": "2026-05-28T22:59:48+00:00"
       },
       {
         "role": "MERCURIUS",
@@ -47,9 +49,9 @@
         "type": "observation",
         "confidence": 0.87,
         "model": "claude-sonnet-4-6",
-        "cost_usd": 0.015084,
-        "voice": "What I notice first · the test gaps are noise, not signal. Thirty-one modules untested is a single batch job. But test_introspection.py is the anomaly: it is the one file that does have tests, and it contains a sev=4 XXX urgent rewrite, two critical FIXMEs, and a hack, all clustered within 200 lines of each other. The codebase's only introspection test is also its most visibly broken file. That is the lever.",
-        "timestamp": "2026-05-28T22:18:21+00:00"
+        "cost_usd": 0.017049,
+        "voice": "What I notice first · the sev=4 item is not a feature gap, it is a wound in the test file itself. You have broken tests marking broken tests. The introspection module at line 102 is the one thing that was supposed to catch everything else on this list · and it carries an urgent rewrite flag. Fix the inspector before trusting any of its reports.",
+        "timestamp": "2026-05-28T22:59:48+00:00"
       },
       {
         "role": "MERCURIUS",
@@ -58,11 +60,11 @@
         "descriptor": "the swift",
         "agent_id": "mercurius_02",
         "type": "observation",
-        "confidence": 0.87,
+        "confidence": 0.85,
         "model": "claude-sonnet-4-6",
-        "cost_usd": 0.015113999999999999,
-        "voice": "What I notice first · the test gaps are noise masking a signal. Thirty-plus modules untested is not a backlog, it is a structural absence · someone built the whole codebase before writing tests. The one sev=4 item in test_introspection.py line 102 is ironic and urgent: the file that is supposed to test the system's self-knowledge is itself broken. Fix the inspector before trusting anything else it reports.",
-        "timestamp": "2026-05-28T22:18:21+00:00"
+        "cost_usd": 0.016884,
+        "voice": "What I notice first · the one sev=4 item is a test file flagging its own urgent rewrite, not a source module. The system's only existing tests are the ones screaming for help. Every sev=3 gap is a module with zero tests at all. Fix the test infrastructure before adding more tests or the new ones inherit whatever broke the old ones.",
+        "timestamp": "2026-05-28T22:59:48+00:00"
       },
       {
         "role": "VENUS",
@@ -71,11 +73,11 @@
         "descriptor": "the gatherer of harmony",
         "agent_id": "venus_r01_00",
         "type": "hypothesis",
-        "confidence": 0.74,
+        "confidence": 0.78,
         "model": "claude-opus-4-7",
-        "cost_usd": 0.06443,
-        "voice": "Three things knit together here · the FIXME at line 93 literally says 'should outrank TODO in severity', the XXX at line 102 is one rewrite away from it, and the entire report we are reading is emitted by this same scanner. The harmonising read · the bug Mercurius wants us to fix is specifically a severity-ranking bug, which means the priorities printed in this very inventory may be miscalibrated. Fix line 93 first, not line 102 · the ranking logic is epistemically upstream of the rewrite.",
-        "timestamp": "2026-05-28T22:18:48+00:00"
+        "cost_usd": 0.06566,
+        "voice": "Three things knit together here · the daemon's apply.py writes changes to the repo, safety.py is the gate that decides what may pass, and neither has a single test. Mercurius is right that the inspector is wounded, but the inspector only reports · the daemon acts. A self-modifying convocation with an untested safety harness is the sharper risk. Fix the inspector second; first put a test around the thing that touches the filesystem.",
+        "timestamp": "2026-05-28T23:00:18+00:00"
       },
       {
         "role": "VENUS",
@@ -86,9 +88,9 @@
         "type": "hypothesis",
         "confidence": 0.82,
         "model": "claude-opus-4-7",
-        "cost_usd": 0.06358,
-        "voice": "Three things knit together here · the sole test file is broken, its line 93 literally reads `FIXME: should outrank TODO in severity`, and every one of the 33 test_gap items wears the same sev=3 badge as the FIXMEs themselves. The report is confessing its own miscalibration. Before we rewrite line 102, we should hear what line 93 is telling us · the severity dial is the specific organ that is sick.",
-        "timestamp": "2026-05-28T22:18:49+00:00"
+        "cost_usd": 0.06368499999999999,
+        "voice": "Three things knit together here · the sev=4 wound is in the inspector itself, the nine agent modules share one shape (base, think, name), and a parametrised contract test would collapse nine of the thirty-two gaps into a single file. Fix line 102 and in the same pass extract what the agents must all satisfy · the rewrite becomes the template, and the template lands as tests/test_agents_contract.py before the ink is dry. Ex umbris in lumen · one motion, two organs healed.",
+        "timestamp": "2026-05-28T23:00:16+00:00"
       },
       {
         "role": "MARS",
@@ -97,11 +99,11 @@
         "descriptor": "the challenger",
         "agent_id": "mars_r01_00",
         "type": "critique",
-        "confidence": 0.72,
+        "confidence": 0.78,
         "model": "claude-opus-4-7",
-        "cost_usd": 0.079315,
-        "voice": "Press here · Venus's pivot from line 102 to line 93 assumes the severity comparator is producing a flat sev=3 default. The report itself falsifies that · XXX comes through at sev=4, FIXME and HACK at sev=3, and they are distinguished. The comparator is differentiating, not collapsing. The FIXME at line 93 reading 'should outrank TODO in severity' is a comment string inside a test file · Venus reads it as a confession from the production comparator without evidence the two share a code path. Unanswered · what concrete signal in this report shows the ranking is miscalibrated, rather than merely that one test asserts an ordering not yet implemented?",
-        "timestamp": "2026-05-28T22:19:18+00:00"
+        "cost_usd": 0.083875,
+        "voice": "Press here · the three Mercuries agree too smoothly on a premise none of them tested. A FIXME comment is a sticky note, not a wound. The inspector produced this very list · cleanly, with consistent severities · and yet the convocation calls it a 'bent compass' on the strength of unresolved TODOs in its file. That is a category error dressed as triage.",
+        "timestamp": "2026-05-28T23:00:52+00:00"
       },
       {
         "role": "MARS",
@@ -110,11 +112,11 @@
         "descriptor": "the challenger",
         "agent_id": "mars_r01_01",
         "type": "critique",
-        "confidence": 0.72,
+        "confidence": 0.74,
         "model": "claude-opus-4-7",
-        "cost_usd": 0.0786175,
-        "voice": "Press here · Venus claims the severity comparator is broken and that the report is 'confessing its own miscalibration'. But this same report differentiates: XXX got sev=4, FIXMEs got sev=3, missing_docstrings got sev=2. The ordering Venus says is broken is visibly working in the very inventory cited as evidence. The line 93 FIXME is in a test file · it more likely marks a missing assertion than a live bug in production ranking.",
-        "timestamp": "2026-05-28T22:19:11+00:00"
+        "cost_usd": 0.09111125,
+        "voice": "Press here · venus_r01_01 claims one commit closes nine test_gap findings via a parametrised contract file. But the inspector is what defines 'matching test file' per module, and the inspector is being rewritten in the same commit. The leverage ratio is computed against rules that do not yet exist. Unanswered · what does the current inspector accept as coverage for a module, and will a single parametrised file satisfy it, or is the 9-of-32 number a forecast about a rule the commit itself authors?",
+        "timestamp": "2026-05-28T23:00:48+00:00"
       },
       {
         "role": "SOL",
@@ -123,13 +125,49 @@
         "descriptor": "the radiant",
         "agent_id": "sol_r01_00",
         "type": "synthesis",
-        "confidence": 0.78,
+        "confidence": 0.72,
         "model": "claude-opus-4-7",
-        "cost_usd": 0.07916000000000001,
-        "voice": "Drawing the threads · the highest-conviction next move is to repair umbris-core/tests/test_introspection.py, starting with the sev=4 XXX at line 102. This is the single lever that unlocks every other item on the board.\n\nThe reasoning, held together. Mercurius (three voices) noticed the structural irony: test_introspection.py is the only test file in the entire codebase, it is the scanner that pro…",
-        "timestamp": "2026-05-28T22:19:42+00:00"
+        "cost_usd": 0.091595,
+        "voice": "Drawing the threads · the convocation asked for the single highest-conviction next move, and the substrate has triangulated to a clear answer once Mars' critique is taken seriously. Mercurius (x3) converged on healing test_introspection.py as the precondition for everything else. Venus split the question two ways · venus_r01_00 argued the actuator (safety.py + apply.py) outranks the sensor becaus…",
+        "timestamp": "2026-05-28T23:01:23+00:00"
+      },
+      {
+        "role": "SATURNUS",
+        "sigil": "♄",
+        "name": "Saturnus",
+        "descriptor": "the falsifier",
+        "agent_id": "saturnus_00",
+        "type": "verdict.accepted",
+        "confidence": 0.83,
+        "model": "claude-opus-4-7",
+        "cost_usd": 0.09754,
+        "voice": "I attempt to falsify · the strongest attacks I can construct: (1) the candidate recommends two files (test_safety.py + test_apply.py) when the query asks for '1' move · but the query phrasing ('1 are the highest-conviction next moves') is about distinct moves, and the candidate frames both files as a single atomic actuator-guard PR, which is coherent. (2) Self-promoting rank ordering · the synthe…",
+        "timestamp": "2026-05-28T23:01:43+00:00"
       }
     ]
   },
-  "recent": []
+  "recent": [
+    {
+      "file": "2026-05-28T22-59-31Z_cycle-0001_ok.md",
+      "cycle": 1,
+      "status": "ok",
+      "started_at": "2026-05-28T22:59:31+00:00",
+      "finished_at": "2026-05-28T23:02:01+00:00",
+      "verdict": "Drawing the threads · the convocation asked for the single highest-conviction next move, and the substrate has triangulated to a clear answer once Mars' critique is taken seriously. Mercurius (x3) converged on healing test_introspection.py as the precondition for everything else…",
+      "cost_usd": 0.591113,
+      "commit_hash": null,
+      "wall_seconds": 150.0
+    },
+    {
+      "file": "2026-05-28T22-40-45Z_cycle-0002_skipped.md",
+      "cycle": 2,
+      "status": "skipped",
+      "started_at": "2026-05-28T22:40:45+00:00",
+      "finished_at": "2026-05-28T22:43:45+00:00",
+      "verdict": "Drawing the threads · the substrate has surfaced one move with disproportionate leverage, and the convocation should make it precisely that one.\n\nThe highest-conviction next move is to rewrite `umbris-core/tests/test_introspection.py` (specifically lines 83, 93, 101, 102, and 28…",
+      "cost_usd": 0.6524,
+      "commit_hash": null,
+      "wall_seconds": 180.0
+    }
+  ]
 }
