@@ -24,13 +24,19 @@ export const dynamic = "force-dynamic";
 // Constants
 // ──────────────────────────────────────────────────────────────────
 
-const MANIFEST_URL =
-  "https://raw.githubusercontent.com/UmbrisLLM/Umbris-AI-LLM-Swarm-Architecture/main/lore/revolutions/auto/manifest.json";
+// Hit our own edge proxy at /api/manifest · it forces fresh fetches
+// from GitHub raw so we never serve content more than ~10s stale.
+// Direct GitHub raw was caching at the CDN edge for up to 5 minutes
+// even with `cache: 'no-store'` from the client, which broke "real-time."
+const MANIFEST_URL = "/api/manifest";
 
 const REPO_BASE =
   "https://github.com/UmbrisLLM/Umbris-AI-LLM-Swarm-Architecture";
 
-const POLL_INTERVAL_MS = 30_000;
+// How often the page hits /api/manifest. The edge proxy caches for
+// 10s so even 30 viewers polling at this cadence is one upstream call
+// per ~10s, not 30 per second.
+const POLL_INTERVAL_MS = 20_000;
 
 // ──────────────────────────────────────────────────────────────────
 // Manifest types · mirror what umbris-core/daemon/transcript.py writes.
