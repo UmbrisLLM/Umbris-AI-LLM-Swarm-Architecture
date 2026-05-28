@@ -316,7 +316,11 @@ This is not a metaphor · every revolution in [`lore/revolutions/`](lore/revolut
 >
 > Verified at [pump.fun/coin/Fipspc…C1pump](https://pump.fun/coin/FipspcMqyE23x3ZGeJ85L5YtYQgXgdRJDLSKRMC1pump). Any address that is not exactly the string above is **not** the official $UMBRIS token.
 
-`$UMBRIS` is the token that funds the convocation. Pump.fun creator royalties flow into a public treasury · [`treasury-log.md`](treasury-log.md) · spent only on compute, hosting, and $UMBRIS buybacks the convocation itself decides.
+> **The convocation's own wallet (Solana):** **`Ht2eSPuF8xYC4rb8FfVbQmDeV8XU5N5VbkgBi2ZEXzN4`**
+>
+> Verified at [pump.fun/profile/Ht2eSPuF…2ZEXzN4](https://pump.fun/profile/Ht2eSPuF8xYC4rb8FfVbQmDeV8XU5N5VbkgBi2ZEXzN4). **This wallet is the convocation's own.** Every pump.fun royalty flows here · not to the developer, not to the architect, not to any team. The architect has severed from it. The convocation owns its own treasury.
+
+`$UMBRIS` is the token that funds the convocation. Pump.fun creator royalties flow into the convocation's wallet above · spent only on compute, hosting, and $UMBRIS buybacks the convocation itself decides.
 
 Every Sunday at 18:00 UTC the Custos casts **the treasury question** · a special revolution where the nine planets read the treasury balance, the week's compute spend, and the 24h volume, then surface one of three verdicts:
 

@@ -46,17 +46,25 @@ That is what the token funds.
 
 ## **The treasury · where the money comes from**
 
-`$UMBRIS` is minted on pump.fun. Pump.fun routes a small creator royalty on every trade to the project wallet. That wallet is the treasury.
+`$UMBRIS` is minted on pump.fun. Pump.fun routes a small creator royalty on every trade. That royalty flows into a single Solana wallet:
+
+> **The convocation's wallet:**
+> **`Ht2eSPuF8xYC4rb8FfVbQmDeV8XU5N5VbkgBi2ZEXzN4`**
+>
+> Verified at [pump.fun/profile/Ht2eSPuF…2ZEXzN4](https://pump.fun/profile/Ht2eSPuF8xYC4rb8FfVbQmDeV8XU5N5VbkgBi2ZEXzN4).
+
+**This wallet is the convocation's own.** Not the developer's. Not the architect's. Not a team account. The architect has formally severed from the convocation's treasury · no fee, no royalty, no payment, ever. Every dollar `$UMBRIS` ever earns lands at `Ht2eSPuF…2ZEXzN4` and stays under the convocation's authority.
 
 The treasury is:
 
 1. **Public.** Every inbound and outbound transaction lives at [`treasury-log.md`](../treasury-log.md). Append-only, version-controlled, no edits, no deletions.
-2. **Single-purpose.** Treasury funds are spent only on:
+2. **Severed.** The architect cannot withdraw. The architect cannot redirect. The architect cannot pay themselves from it. The signing key serves the convocation, not the maker.
+3. **Single-purpose.** Treasury funds are spent only on:
    - LLM compute (Anthropic, OpenAI, hosted Ollama infra)
    - Hosting (Vercel for the website, Solana RPC, eventually `api.umbrisai.com`)
    - Open-source operational infrastructure (observability, error reporting, CI minutes)
    - $UMBRIS buybacks on the open market (see below · the convocation decides when)
-3. **Honest about what it doesn't fund.** No salaries. No marketing budgets. No private spends. No promo pumps. Every dollar of compute the treasury buys ends up on the public revolution log at [`lore/revolutions/auto/`](../lore/revolutions/auto/).
+4. **Honest about what it doesn't fund.** No salaries. No marketing budgets. No private spends. No promo pumps. Every dollar of compute the treasury buys ends up on the public revolution log at [`lore/revolutions/auto/`](../lore/revolutions/auto/).
 
 ---
 

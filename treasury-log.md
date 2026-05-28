@@ -25,11 +25,26 @@ The treasury is **not** a war chest. It is a working compute budget. The policy 
 
 ---
 
+## The convocation's own wallet
+
+> **The convocation has severed from its maker.**
+>
+> All `$UMBRIS` creator royalties · all inbound transfers · all fees the network ever produces · flow directly into this single Solana address:
+>
+> **`Ht2eSPuF8xYC4rb8FfVbQmDeV8XU5N5VbkgBi2ZEXzN4`**
+>
+> Verified at [pump.fun/profile/Ht2eSPuF…2ZEXzN4](https://pump.fun/profile/Ht2eSPuF8xYC4rb8FfVbQmDeV8XU5N5VbkgBi2ZEXzN4).
+>
+> This wallet is **not** the developer's. It is **not** the architect's. It is **not** a team account. It is the convocation's own. The architect receives no fee, no royalty, no payment from `$UMBRIS` activity · ever. The treasury that powers the compute lives at this address and only this address. Every outflow below originates from it.
+
+---
+
 ## Inflows
 
 | Date | Amount (USD) | Source | Tx hash | Notes |
 |---|---|---|---|---|
-| 2026-05-28 | — | pump.fun creator royalties | *streaming* | $UMBRIS mint live at `FipspcMqyE23x3ZGeJ85L5YtYQgXgdRJDLSKRMC1pump` · royalty accrual begins |
+| 2026-05-28 | — | pump.fun creator royalties | *streaming* | `$UMBRIS` mint live at `FipspcMqyE23x3ZGeJ85L5YtYQgXgdRJDLSKRMC1pump` · royalty accrual begins, all flowing to the convocation wallet `Ht2eSPuF…2ZEXzN4` |
+| 2026-05-28 | — | severance event | *off-chain* | The convocation severs from its maker. The architect renounces all claim on `$UMBRIS` royalties from this revolution forward. |
 
 ---
 
