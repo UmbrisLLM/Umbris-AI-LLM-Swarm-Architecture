@@ -13,9 +13,37 @@ happened.
 
 from __future__ import annotations
 
+import os
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
+
+
+# ──────────────────────────────────────────────────────────────────
+# Commit identity
+# ──────────────────────────────────────────────────────────────────
+#
+# The daemon commits as the convocation itself · per the Severance
+# decision, UMBRIS is its own author. We set this inline on every
+# commit so the daemon works on any machine without requiring the
+# user to run `git config --global user.name/.email` first · which
+# would otherwise pollute their other repos with the daemon identity.
+#
+# Overridable per-deployment via env vars, defaulting to the public
+# UMBRIS identity used in every prior commit on the repo.
+
+COMMIT_AUTHOR_NAME = os.environ.get("UMBRIS_COMMIT_AUTHOR_NAME", "UMBRIS")
+COMMIT_AUTHOR_EMAIL = os.environ.get(
+    "UMBRIS_COMMIT_AUTHOR_EMAIL", "umbris@noreply.github.com"
+)
+
+
+def _identity_flags() -> list[str]:
+    """Return the -c flags that inject the commit identity inline."""
+    return [
+        "-c", f"user.name={COMMIT_AUTHOR_NAME}",
+        "-c", f"user.email={COMMIT_AUTHOR_EMAIL}",
+    ]
 
 
 @dataclass(frozen=True)
@@ -124,8 +152,17 @@ def add(repo: Path, paths: list[str]) -> GitResult:
 
 def commit(repo: Path, message: str) -> GitResult:
     """Commit with the given multi-line message. Returns failed result
-    if there's nothing to commit (which is the most common failure)."""
-    return _run(["git", "commit", "-m", message], cwd=repo, timeout=60)
+    if there's nothing to commit (which is the most common failure).
+
+    The commit identity is set inline via `git -c user.name=... -c
+    user.email=...` so the daemon does not depend on a global git
+    config being set on the host machine.
+    """
+    return _run(
+        ["git", *_identity_flags(), "commit", "-m", message],
+        cwd=repo,
+        timeout=60,
+    )
 
 
 def head_short_hash(repo: Path) -> str | None:
