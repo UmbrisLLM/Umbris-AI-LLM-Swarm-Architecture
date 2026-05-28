@@ -5,7 +5,6 @@ import nextDynamic from "next/dynamic";
 export const dynamic = "force-dynamic";
 
 import { Manifesto } from "@/components/Manifesto";
-import { ContractAddress } from "@/components/ContractAddress";
 import { Principles } from "@/components/Principles";
 import { Architecture } from "@/components/Architecture";
 import { LiveConvocation } from "@/components/LiveConvocation";
@@ -62,7 +61,6 @@ export default function HomePage() {
               <br />
               for&nbsp; collective&nbsp; reasoning
             </p>
-            <ContractAddress />
           </div>
 
           <div className="absolute bottom-12 flex flex-col items-center gap-3">

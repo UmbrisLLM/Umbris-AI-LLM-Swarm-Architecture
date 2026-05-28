@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { ContractAddress } from "./ContractAddress";
 
 const ITEMS = [
   { label: "Manifesto",        href: "/manifesto" },
@@ -53,6 +54,7 @@ export function Nav() {
               </Link>
             );
           })}
+          <ContractAddress />
           <a
             href="https://github.com/UmbrisLLM/Umbris-AI-LLM-Swarm-Architecture"
             target="_blank"
