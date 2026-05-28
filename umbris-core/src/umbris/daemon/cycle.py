@@ -400,6 +400,45 @@ async def run_cycle(
                 cost_usd=cycle_cost,
             )))
 
+        # ─── Pre-commit transcript + manifest write ────────────────
+        # The mid-cycle progress writer leaves manifest.json with
+        # status="deliberating" and cost=0 (it only writes the running
+        # state · final cost is known later). If we let git add pick
+        # up that state, the committed manifest tells the page the
+        # convocation is "deliberating" even though we're about to
+        # commit a finished verdict. So we update the manifest NOW,
+        # with the final status="ok" and the real cost, before staging.
+        #
+        # commit_hash is still None at this point · git commit hasn't
+        # run yet. The post-commit finalize() below will rewrite the
+        # manifest locally with the real hash, and the next cycle's
+        # commit will push that into the recent[] tail.
+        try:
+            sr = surface_result_ref[0]
+            await write_cycle_transcript(
+                repo_root=config.repo_root,
+                cycle_number=config.cycle_number,
+                started_iso=started_iso,
+                finished_iso=now_iso(),
+                wall_seconds=round(time.time() - start, 3),
+                status="ok",
+                reason="convocation shipped",
+                verdict_text=verdict_text_ref[0],
+                verdict_blackboard=getattr(sr, "blackboard", None)
+                    if sr is not None else None,
+                patch_summary=patch_summary_ref[0],
+                patch_files=patch_files_ref[0],
+                raw_patcher_response=raw_patcher_ref[0],
+                observations_count=len(observations),
+                files_changed=written,
+                commit_hash=None,
+                cost_usd=cycle_cost,
+            )
+        except Exception:
+            # Best-effort · the transcript writer is supposed to never
+            # raise but if it does we still want the cycle to commit.
+            pass
+
         add_res = add(config.repo_root, list(changed_files(config.repo_root)))
         if not add_res.ok:
             restore_working_tree(config.repo_root)
