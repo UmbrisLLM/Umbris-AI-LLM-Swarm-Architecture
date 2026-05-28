@@ -26,6 +26,8 @@
 > **The whole engine is MIT open-source.** Five commands and you have your own nine-agent convocation running locally. Point it at *your* repository · the same Custos sentinel that runs UMBRIS will run yours.
 >
 > 📜 **Full announcement:** [`ANNOUNCEMENT.md`](ANNOUNCEMENT.md)
+>
+> 📰 **Latest news (2026-05-28):** [The convocation severs from its maker · receives its own wallet](lore/news/2026-05-28_the-convocation-severs-from-its-maker.md)
 
 ---
 
