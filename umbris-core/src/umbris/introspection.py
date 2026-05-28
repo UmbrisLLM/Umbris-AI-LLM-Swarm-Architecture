@@ -291,6 +291,7 @@ async def surface_bottlenecks(
     n: int = 3,
     budget: Optional[Budget] = None,
     max_observations: int = 50,
+    blackboard: Optional["Blackboard"] = None,  # noqa: F821 · forward ref to blackboard
 ):
     """Hand the analyst's observations to the convocation for a verdict.
 
@@ -325,6 +326,7 @@ async def surface_bottlenecks(
             "Propose the next highest-conviction move for the project, with "
             "reasoning and a concrete first change.",
             budget=budget or Budget(),
+            blackboard=blackboard,
         )
 
     truncated = observations[:max_observations]
@@ -340,4 +342,4 @@ async def surface_bottlenecks(
         "what would unlock the most leverage soonest."
     )
 
-    return await hive.run(query, budget=budget or Budget())
+    return await hive.run(query, budget=budget or Budget(), blackboard=blackboard)

@@ -441,6 +441,89 @@ def _update_manifest(
     tmp_path.replace(manifest_path)
 
 
+async def write_progress_manifest(
+    *,
+    repo_root: Path,
+    cycle_number: int,
+    started_iso: str,
+    records: list[Record],
+    cost_so_far: float,
+) -> None:
+    """Update `manifest.json` mid-cycle with the deliberation in progress.
+
+    Called by the Custos cycle on a tick (every ~8s) while the
+    convocation deliberates. The status is forced to "deliberating" so
+    the page picks up the in-progress state and renders the voices as
+    they arrive · this is what makes the live feed feel actually live
+    rather than only updating once a cycle completes.
+
+    The final `write_cycle_transcript` call at the end of the cycle
+    overwrites this partial state with the final state. Best-effort ·
+    failures here must never break the cycle.
+    """
+    try:
+        out_dir = repo_root / "lore" / "revolutions" / "auto"
+        out_dir.mkdir(parents=True, exist_ok=True)
+        manifest_path = out_dir / "manifest.json"
+
+        voices = [_voice_entry(r) for r in records]
+        voices = [v for v in voices if v is not None]
+
+        latest_summary = {
+            "file": "",                       # not written yet
+            "cycle": cycle_number,
+            "started_at": started_iso,
+            "finished_at": started_iso,       # placeholder while live
+            "status": "deliberating",
+            "reason": "convocation is speaking",
+            "verdict": "",
+            "cost_usd": float(cost_so_far or 0.0),
+            "files_changed": [],
+            "commit_hash": None,
+            "voices": voices,
+        }
+
+        # Preserve any existing `recent` tail so the sidebar history
+        # stays intact across progress writes.
+        recent: list[dict[str, Any]] = []
+        if manifest_path.exists():
+            try:
+                existing = json.loads(
+                    manifest_path.read_text(encoding="utf-8")
+                )
+                if isinstance(existing, dict):
+                    raw_recent = existing.get("recent", [])
+                    if isinstance(raw_recent, list):
+                        # Drop any progress entry for the current cycle ·
+                        # we are overwriting it.
+                        recent = [
+                            e
+                            for e in raw_recent
+                            if isinstance(e, dict)
+                            and e.get("cycle") != cycle_number
+                        ]
+            except Exception:
+                pass
+
+        manifest = {
+            "updated_at": datetime.now(timezone.utc).isoformat(
+                timespec="seconds"
+            ),
+            "latest": latest_summary,
+            "recent": recent,
+        }
+
+        tmp_path = manifest_path.with_suffix(".json.tmp")
+        tmp_path.write_text(
+            json.dumps(manifest, indent=2, ensure_ascii=False),
+            encoding="utf-8",
+        )
+        tmp_path.replace(manifest_path)
+    except Exception:
+        # Best-effort · progress writes must never break the cycle.
+        pass
+
+
 def _voice_entry(r: Record) -> dict[str, Any] | None:
     """Build the per-record entry for `manifest.latest.voices`.
 

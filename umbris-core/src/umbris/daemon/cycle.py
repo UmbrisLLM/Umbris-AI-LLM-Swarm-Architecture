@@ -19,6 +19,7 @@ with a clean `status` so Custos can keep going.
 
 from __future__ import annotations
 
+import asyncio
 import subprocess
 import time
 from dataclasses import dataclass
@@ -26,6 +27,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from ..blackboard import InMemoryBlackboard
 from ..umbra import Umbra
 from ..introspection import RepoAnalyst, surface_bottlenecks
 from ..llm.client import LLMClient
@@ -41,7 +43,14 @@ from .git_ops import (
 )
 from .log import CycleEvent, now_iso
 from .safety import CostLedger, PathPolicy
-from .transcript import write_cycle_transcript
+from .transcript import write_cycle_transcript, write_progress_manifest
+
+
+# How often the mid-cycle progress writer flushes the in-progress
+# deliberation to the manifest. 8s strikes a balance · the page polls
+# every 20s, so two flushes happen between polls · visible motion
+# without thrashing disk + git.
+PROGRESS_TICK_SECONDS = 8.0
 
 
 # ──────────────────────────────────────────────────────────────────
@@ -219,10 +228,61 @@ async def run_cycle(
         )))
 
     # ── 2. Surface a bottleneck ────────────────────────────────
+    # Construct the blackboard up-front so a background progress writer
+    # can poll it while the convocation deliberates. Each tick writes
+    # the current voices to `manifest.json` with status="deliberating"
+    # so umbrisai.com/convocation streams the deliberation as it happens
+    # rather than only updating once per finished cycle.
     umbra = Umbra(llm=llm)
-    surface_result = await surface_bottlenecks(
-        umbra, observations, n=config.observations_top_n,
-    )
+    live_bb = InMemoryBlackboard()
+
+    async def _progress_writer() -> None:
+        """Flush in-progress voices to the manifest every PROGRESS_TICK_SECONDS."""
+        try:
+            while True:
+                await asyncio.sleep(PROGRESS_TICK_SECONDS)
+                try:
+                    records = list(await live_bb.read())
+                except Exception:
+                    records = []
+                # The LLM client tracks running spend on its own ledger ·
+                # surface that as the in-progress cost.
+                cost_so_far = 0.0
+                try:
+                    cost_so_far = float(
+                        getattr(llm, "total_cost_usd", 0.0) or 0.0
+                    )
+                except Exception:
+                    pass
+                await write_progress_manifest(
+                    repo_root=config.repo_root,
+                    cycle_number=config.cycle_number,
+                    started_iso=started_iso,
+                    records=records,
+                    cost_so_far=cost_so_far,
+                )
+        except asyncio.CancelledError:
+            # Normal · cycle is finishing; suppress the cancellation.
+            raise
+        except Exception:
+            # Best-effort · never let progress writes break the cycle.
+            return
+
+    progress_task = asyncio.create_task(_progress_writer())
+
+    try:
+        surface_result = await surface_bottlenecks(
+            umbra, observations,
+            n=config.observations_top_n,
+            blackboard=live_bb,
+        )
+    finally:
+        progress_task.cancel()
+        try:
+            await progress_task
+        except (asyncio.CancelledError, Exception):
+            pass
+
     surface_result_ref[0] = surface_result   # for the transcript writer
     verdict_text = _extract_text(surface_result.answer)
     verdict_text_ref[0] = verdict_text

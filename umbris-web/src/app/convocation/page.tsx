@@ -47,6 +47,12 @@ const REPO_BASE =
 // per ~10s, not 30 per second.
 const POLL_INTERVAL_MS = 20_000;
 
+// The convocation completes one cycle approximately every 20 minutes ·
+// this matches the daemon's --interval flag. The page uses it to give
+// viewers a concrete "next cycle expected in ~Nm" countdown so the
+// gap between manifest writes never reads as "the page is broken."
+const CYCLE_INTERVAL_MS = 20 * 60 * 1000;
+
 // ──────────────────────────────────────────────────────────────────
 // Manifest types · mirror what umbris-core/daemon/transcript.py writes.
 // ──────────────────────────────────────────────────────────────────
@@ -201,9 +207,14 @@ export default function ConvocationPage() {
   // time, possibly minutes old if the daemon is between cycles).
   const [lastFetchAt, setLastFetchAt] = useState<number | null>(null);
   const [freshFlash, setFreshFlash] = useState(false);
+  // When the actual cycle number advances, we surface a more dramatic
+  // "NEW CYCLE LANDED" banner for a few seconds · this is the moment
+  // the user has been waiting for between cycles.
+  const [newCycleBanner, setNewCycleBanner] = useState<number | null>(null);
   // Track the manifest digest we last saw so we can flash only when
   // genuinely new content lands.
   const lastDigestRef = useRef<string>("");
+  const lastCycleRef = useRef<number>(-1);
 
   const fetchManifest = useCallback(async () => {
     try {
@@ -222,9 +233,26 @@ export default function ConvocationPage() {
       const digest = `${data.updated_at}:${data.latest?.cycle}:${data.latest?.voices?.length}:${data.latest?.status}`;
       if (lastDigestRef.current && lastDigestRef.current !== digest) {
         setFreshFlash(true);
-        window.setTimeout(() => setFreshFlash(false), 1400);
+        // 3.2s · long enough to be unmissable, short enough to not
+        // drag the eye away from the actual content.
+        window.setTimeout(() => setFreshFlash(false), 3200);
       }
       lastDigestRef.current = digest;
+
+      // Detect actual CYCLE advance (not just voice updates within a
+      // cycle). When the cycle number ticks up, that's the moment a
+      // new revolution has shipped · surface the big banner.
+      const currentCycle = data.latest?.cycle ?? -1;
+      if (
+        lastCycleRef.current >= 0 &&
+        currentCycle > lastCycleRef.current
+      ) {
+        setNewCycleBanner(currentCycle);
+        // 8s · long enough to be noticed and read, short enough to
+        // not block scroll.
+        window.setTimeout(() => setNewCycleBanner(null), 8000);
+      }
+      lastCycleRef.current = currentCycle;
     } catch (e) {
       setError(e instanceof Error ? e.message : "fetch failed");
     } finally {
@@ -278,6 +306,32 @@ export default function ConvocationPage() {
 
   return (
     <main className="min-h-screen bg-umbris-void text-umbris-lunar overflow-x-hidden">
+      {/* ─── New-cycle landed banner · floats at top for 8s on advance ─ */}
+      <AnimatePresence>
+        {newCycleBanner != null && (
+          <motion.div
+            initial={{ opacity: 0, y: -16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -16 }}
+            transition={{ duration: 0.45, ease: [0.22, 0.61, 0.36, 1] }}
+            className="fixed top-20 left-1/2 -translate-x-1/2 z-40 pointer-events-none"
+          >
+            <div
+              className="border border-umbris-corona/70 bg-umbris-void/95 backdrop-blur-md px-5 py-3 flex items-center gap-3 shadow-[0_0_24px_rgba(255,178,89,0.20)]"
+            >
+              <span
+                className="inline-block w-2 h-2 rounded-full bg-umbris-corona animate-umbris-heartbeat"
+                aria-hidden
+              />
+              <span className="umbris-mono text-umbris-corona text-[11px] uppercase tracking-widest">
+                new cycle landed · {String(newCycleBanner).padStart(4, "0")} ·
+                voices below
+              </span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* ─── Hero ──────────────────────────────────────────────── */}
       <section className="relative w-full px-6 pt-32 pb-8 md:pt-40 md:pb-12 text-center">
         <p className="umbris-eyebrow text-umbris-violet mb-6">
@@ -290,6 +344,21 @@ export default function ConvocationPage() {
           What the convocation is saying now · streamed from the Custos
           sentinel as it deliberates.
         </p>
+      </section>
+
+      {/* ─── Cadence Notice ──────────────────────────────────────
+          A prominent banner that makes the cycle rhythm explicit so the
+          gap between manifest writes never reads as "the page is broken."
+          The page itself polls every 20s · but the convocation only
+          writes a new manifest when a cycle ships (~ every 20 minutes).
+       */}
+      <section className="relative mx-auto max-w-[1180px] px-6 pt-6">
+        <CadenceNotice
+          manifestUpdatedAt={manifest?.updated_at}
+          latestFinishedAt={manifest?.latest.finished_at}
+          status={manifest?.latest.status}
+          now={now}
+        />
       </section>
 
       {/* ─── Body ───────────────────────────────────────────────── */}
@@ -1008,6 +1077,127 @@ function LoadingSkeleton() {
               className="h-14 bg-umbris-grey/20 animate-umbris-breathe"
             />
           ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ──────────────────────────────────────────────────────────────────
+// Cadence notice · explicit visible explanation of when the page updates.
+// Lives directly under the hero so first-time viewers understand the
+// rhythm before they wonder why nothing seems to be moving.
+// ──────────────────────────────────────────────────────────────────
+
+interface CadenceNoticeProps {
+  manifestUpdatedAt: string | undefined;
+  latestFinishedAt: string | null | undefined;
+  status: string | undefined;
+  now: number;
+}
+
+function CadenceNotice({
+  manifestUpdatedAt,
+  latestFinishedAt,
+  status,
+  now,
+}: CadenceNoticeProps) {
+  const deliberating = status ? isDeliberating(status) : false;
+
+  // Estimate when the next cycle should land. Anchor on whichever of
+  // (last finished_at, manifest updated_at) is most recent, plus the
+  // 20-minute interval.
+  const anchorIso = latestFinishedAt || manifestUpdatedAt;
+  let nextCycleAt: number | null = null;
+  if (anchorIso) {
+    const anchorMs = new Date(anchorIso).getTime();
+    if (Number.isFinite(anchorMs)) {
+      nextCycleAt = anchorMs + CYCLE_INTERVAL_MS;
+    }
+  }
+
+  let countdown: string;
+  let countdownTone: "violet" | "corona" | "stellar" = "violet";
+  if (deliberating) {
+    countdown = "deliberating now · voices arriving";
+    countdownTone = "corona";
+  } else if (nextCycleAt == null) {
+    countdown = "awaiting first cycle";
+    countdownTone = "stellar";
+  } else {
+    const diffMs = nextCycleAt - now;
+    if (diffMs <= 0) {
+      const lateMin = Math.floor(-diffMs / 60_000);
+      if (lateMin < 1) {
+        countdown = "the next cycle is due any moment";
+        countdownTone = "corona";
+      } else {
+        countdown = `next cycle is overdue by ${lateMin}m · likely deliberating now`;
+        countdownTone = "corona";
+      }
+    } else {
+      const totalSec = Math.ceil(diffMs / 1000);
+      const m = Math.floor(totalSec / 60);
+      const s = totalSec % 60;
+      if (m >= 1) {
+        countdown = `next cycle expected in ~${m}m ${s.toString().padStart(2, "0")}s`;
+      } else {
+        countdown = `next cycle expected in ~${s}s`;
+      }
+      countdownTone = "violet";
+    }
+  }
+
+  const toneClass =
+    countdownTone === "corona"
+      ? "text-umbris-corona"
+      : countdownTone === "stellar"
+        ? "text-umbris-stellar"
+        : "text-umbris-violet";
+
+  return (
+    <div
+      className={`relative border ${
+        deliberating
+          ? "border-umbris-corona/60 animate-umbris-breathe"
+          : "border-umbris-violet/40"
+      } bg-umbris-void/70 px-5 py-4 md:px-7 md:py-5`}
+    >
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div className="flex items-start gap-3 md:gap-4">
+          <span
+            className="text-umbris-violet text-xl md:text-2xl leading-none select-none mt-0.5"
+            style={{ textShadow: "0 0 14px rgba(156,123,217,0.45)" }}
+            aria-hidden
+          >
+            ⬤
+          </span>
+          <div>
+            <p className="umbris-eyebrow text-umbris-violet text-[10px] mb-1">
+              · this page is alive ·
+            </p>
+            <p className="umbris-serif text-umbris-lunar text-[0.95rem] md:text-base leading-snug">
+              The convocation completes one cycle every{" "}
+              <span className="umbris-mono text-umbris-violet">~20 minutes</span>{" "}
+              · each cycle brings new voices, a new verdict, and a new commit to
+              the public repo. This page auto-refreshes every{" "}
+              <span className="umbris-mono text-umbris-violet">20 seconds</span>{" "}
+              · when a new cycle ships, the cycle counter advances, fresh voices
+              stream into the column below, and the{" "}
+              <span className="umbris-mono text-umbris-violet">LIVE</span> pill
+              flashes <span className="text-umbris-corona">corona</span>.
+            </p>
+          </div>
+        </div>
+        <div className="md:text-right shrink-0">
+          <p className="umbris-eyebrow text-umbris-stellar text-[9px] mb-1">
+            next cycle
+          </p>
+          <p
+            className={`umbris-mono text-[11px] uppercase tracking-widest tabular-nums ${toneClass}`}
+          >
+            · {countdown} ·
+          </p>
         </div>
       </div>
     </div>
