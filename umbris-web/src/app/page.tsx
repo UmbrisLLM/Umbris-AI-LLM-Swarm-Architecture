@@ -5,6 +5,7 @@ import nextDynamic from "next/dynamic";
 export const dynamic = "force-dynamic";
 
 import { Severance } from "@/components/Severance";
+import { DaemonShowcase } from "@/components/DaemonShowcase";
 import { Manifesto } from "@/components/Manifesto";
 import { Principles } from "@/components/Principles";
 import { Architecture } from "@/components/Architecture";
@@ -81,6 +82,9 @@ export default function HomePage() {
 
       {/* ─── Severance · the convocation owns its own wallet ───── */}
       <Severance />
+
+      {/* ─── The daemon's own publication channel (v1.1.1) ─────── */}
+      <DaemonShowcase />
 
       {/* ─── The convocation as told in eight movements ────────── */}
       <Manifesto />

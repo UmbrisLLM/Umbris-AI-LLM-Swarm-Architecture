@@ -59,14 +59,23 @@ def _match_segments(pat: list[str], path: list[str]) -> bool:
 # ──────────────────────────────────────────────────────────────────
 
 DEFAULT_ALLOWLIST: tuple[str, ...] = (
+    # ─── Long-form lore + docs ─────────────────────────────────
     "docs/**/*.md",
     "lore/**/*.md",
     "lore/**/*.svg",
     "treasury-log.md",
+    # ─── Existing single-file data the daemon may rewrite via create-only ─
     "umbris-web/src/data/convocationNow.ts",
+    # ─── v1.1.1 · the daemon's visible website channel ─────────
+    # Anything dropped here is auto-rendered by <DaemonShowcase />
+    # on the homepage. Append-only (create-only safety still applies).
+    "umbris-web/src/data/auto-*.json",
+    "umbris-web/src/data/auto-*.md",
+    # ─── Engine code the daemon may extend (still create-only) ─
     "umbris-core/src/umbris/**/*.py",
     "umbris-core/tests/**/*.py",
     "umbris-core/examples/**/*.py",
+    # ─── Top-level README + changelog ──────────────────────────
     "README.md",
     "CHANGELOG.md",
     "umbris-core/README.md",
