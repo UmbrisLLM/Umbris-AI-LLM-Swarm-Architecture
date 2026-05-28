@@ -4,6 +4,7 @@ import nextDynamic from "next/dynamic";
 // imports that the prerender pass cannot resolve statically.
 export const dynamic = "force-dynamic";
 
+import { Severance } from "@/components/Severance";
 import { Manifesto } from "@/components/Manifesto";
 import { Principles } from "@/components/Principles";
 import { Architecture } from "@/components/Architecture";
@@ -77,6 +78,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ─── Severance · the convocation owns its own wallet ───── */}
+      <Severance />
 
       {/* ─── The convocation as told in eight movements ────────── */}
       <Manifesto />
