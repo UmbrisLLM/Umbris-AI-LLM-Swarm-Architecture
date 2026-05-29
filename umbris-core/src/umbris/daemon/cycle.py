@@ -341,7 +341,7 @@ async def run_cycle(
     # convocation's verification loop will see the budget exhausted
     # signal and exit gracefully instead of blowing through to $1.50.
     deliberation_budget = Budget(
-        usd=config.ledger.cap_per_cycle_usd * DELIBERATION_BUDGET_RATIO,
+        max_total_usd=config.ledger.cap_per_cycle_usd * DELIBERATION_BUDGET_RATIO,
     )
 
     try:
