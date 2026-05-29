@@ -27,6 +27,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from ..agents.base import Budget
 from ..blackboard import InMemoryBlackboard
 from ..umbra import Umbra
 from ..introspection import RepoAnalyst, surface_bottlenecks
