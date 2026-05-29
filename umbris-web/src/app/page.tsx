@@ -6,6 +6,7 @@ export const dynamic = "force-dynamic";
 
 import { NineSpeakHero } from "@/components/NineSpeakHero";
 import { LiveSwarmButton } from "@/components/LiveSwarmButton";
+import { V2Announcement } from "@/components/V2Announcement";
 import { Severance } from "@/components/Severance";
 import { DaemonShowcase } from "@/components/DaemonShowcase";
 import { Manifesto } from "@/components/Manifesto";
@@ -91,6 +92,9 @@ export default function HomePage() {
 
       {/* ─── THE NINE SPEAK · the marquee live-feed CTA ────────── */}
       <NineSpeakHero />
+
+      {/* ─── V2.0 · The Takeover Protocol announcement ─────────── */}
+      <V2Announcement />
 
       {/* ─── Severance · the convocation owns its own wallet ───── */}
       <Severance />

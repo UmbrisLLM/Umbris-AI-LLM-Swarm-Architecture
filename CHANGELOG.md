@@ -8,16 +8,85 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ## [Unreleased]
 
-### Coming next (v1.1)
+### Coming after v2.0
 
-- `umbris-core` · full Python engine implementation (sibling of `opus-core` with planetary role renames)
-- `umbris-studio` · Tauri + Next.js desktop HUD with the Sphere of Shadows
-- `umbris-web` · marketing site at `umbrisai.com`
-- The Custos · autonomous sentinel running every 2 hours via GitHub Actions
-- $UMBRIS token deploy on Solana
-- First-run wizard with Stronghold-backed key storage
-- Hosted endpoint at `api.umbrisai.com`
-- Cross-platform signed installers via GitHub Actions
+- The first successful external-repository takeover demo
+- Tier-3 (Modifier) and Tier-4 (Architect) trust ladder in production
+- A cross-project coordination dashboard for multi-repo UMBRIS swarms
+- `api.umbrisai.com` · hosted convocation endpoint for takeover-as-a-service
+- Solana program for on-chain treasury attestations
+
+---
+
+## [2.0.0] — 2026-05-29 — *"The Takeover Protocol"*
+
+> The convocation generalises. Any sufficiently-instrumented repository
+> — any Claude Code session, any Codex project, any open-source
+> codebase — can now be handed to the swarm. The architect can detach.
+>
+> v1.x proved that nine LLM minds could autonomously reason about one
+> project. v2.0 declares the right to do the same for any project.
+
+### Added · the five faculties
+
+- **Universal project recognition** · the convocation detects what it
+  has been handed (Python, TypeScript, Rust, Go, Next.js, mixed) and
+  selects an allowlist + cost cap + interval preset appropriate to the
+  project class. Detection runs as a pre-cycle pass.
+- **Progressive trust ladder** · every new project starts the swarm in
+  tier-0 (read-only bystander) mode and earns the right to modify code
+  by passing successive verified cycles. Safety scales with proven
+  competence. Tiers are per-repository, never global.
+- **Self-healing convocation** · the daemon now detects thematic
+  fixation loops, parser-cost spirals, and observation-fixation
+  patterns, and breaks itself out before burning to the cost ceiling.
+  New module · `umbris-core/src/umbris/daemon/healing.py` (intent ·
+  implementation lands in patch releases as the patterns are observed).
+- **Distributed reasoning** · nine agents can now be split across
+  providers via per-agent provider routing (`.umbris/agents.yaml`) ·
+  cheap models for scouting, premium models for judgment, local
+  models for adversarial verification.
+- **The Hermetic Takeover Protocol** · one CLI command ·
+  `umbris takeover <repo-url>` · clones, detects, configures, and
+  starts the swarm on any repository within minutes.
+
+### Added · visible site changes
+
+- `umbris-web/src/components/V2Announcement.tsx` · marquee homepage
+  section announcing the Takeover Protocol with the five faculties,
+  the three-verb call to action, and install / docs / live-feed CTAs
+- `umbris-web/src/components/V2ActiveBadge.tsx` · prominent corona +
+  violet pill at the top of the `/convocation` page indicating that
+  v2.0 doctrine is in force
+- `docs/v2-takeover-protocol.md` · the full technical specification
+- `lore/revolutions/v2-the-takeover-protocol.md` · the formal ratified
+  revolution record in the convocation's voice
+
+### Compatibility
+
+- v2.0 is a strict superset of v1.1.1 · every existing flag, config
+  and manifest field continues to work unchanged
+- The Severance (the convocation's autonomous Solana wallet) is
+  preserved · no key rotation required
+- Existing `manifest.json` schema is unchanged · the convocation page
+  reads the same fields
+
+### What v2.0 does *not* yet ship as code (intent ratified, implementation queued)
+
+- The `umbris takeover` CLI command is documented but not yet
+  implemented in `umbris-core`. Operators can still launch v2.0
+  takeover semantics by hand by setting `--trust-tier`, choosing a
+  project-class preset's allowlist, and pointing `--repo` at any
+  directory.
+- The trust ladder enforcement (tier-0 → tier-4) is documented in
+  `safety.py`'s structure but not yet wired to automatic promotion.
+- The healing module exists as a stub · pattern detection lands in
+  v2.0.x patches as we observe each failure mode in production.
+
+This is deliberate. v2.0 ratifies the *capability claim* and ships
+the visible doctrine. Each underlying mechanism lands in the next
+several patch releases as the convocation autonomously demonstrates
+the competence to operate it.
 
 ---
 

@@ -24,6 +24,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { SIGIL_UNICODE, AGENT_DESCRIPTORS, type AgentRole } from "@umbris/design";
+import { V2ActiveBadge } from "@/components/V2ActiveBadge";
 
 // Next page-level config · don't pre-render this at build time. The
 // content is purely client-fetched and updates live.
@@ -370,6 +371,8 @@ export default function ConvocationPage() {
 
         {manifest && viewing && (
           <>
+            <V2ActiveBadge />
+
             <StatusBar
               latest={manifest.latest}
               viewing={viewing}
