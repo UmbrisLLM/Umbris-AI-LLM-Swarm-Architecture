@@ -53,6 +53,55 @@ from .transcript import write_cycle_transcript, write_progress_manifest
 # without thrashing disk + git.
 PROGRESS_TICK_SECONDS = 8.0
 
+# Self-healing v2.0 · the convocation's deliberation may spend at most
+# this fraction of the per-cycle cost cap. Leaves 30% headroom for the
+# patcher step, so a runaway deliberation can't burn the whole cap on
+# its own before the Patcher gets a turn.
+DELIBERATION_BUDGET_RATIO = 0.70
+
+# Self-healing v2.0 · how many of the most recent commits to inspect
+# for fixation detection. If the convocation proposes a patch that
+# touches a file we've shipped in the last N commits, reject early so
+# the next cycle is forced to pick a different angle.
+FIXATION_LOOKBACK_COMMITS = 5
+
+
+def _recently_shipped_paths(
+    repo_root: Path, lookback: int = FIXATION_LOOKBACK_COMMITS
+) -> set[str]:
+    """Return the set of repo-relative file paths touched by the last
+    ``lookback`` commits authored by UMBRIS itself. Used as a fixation
+    detector · the convocation should not be allowed to re-propose
+    edits to files it just shipped.
+
+    Best-effort · returns an empty set on any error so the cycle never
+    breaks because of fixation detection itself."""
+    try:
+        proc = subprocess.run(
+            [
+                "git", "log",
+                f"--max-count={lookback}",
+                "--author=UMBRIS",
+                "--name-only",
+                "--pretty=format:",
+            ],
+            cwd=repo_root,
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=False,
+        )
+        if proc.returncode != 0:
+            return set()
+        out: set[str] = set()
+        for line in proc.stdout.splitlines():
+            line = line.strip()
+            if line:
+                out.add(line)
+        return out
+    except Exception:
+        return set()
+
 
 # ──────────────────────────────────────────────────────────────────
 # Result + config
@@ -287,11 +336,20 @@ async def run_cycle(
 
     progress_task = asyncio.create_task(_progress_writer())
 
+    # Self-healing budget guard · cap the deliberation at 70% of the
+    # per-cycle cap so it can't burn the whole budget on its own. The
+    # convocation's verification loop will see the budget exhausted
+    # signal and exit gracefully instead of blowing through to $1.50.
+    deliberation_budget = Budget(
+        usd=config.ledger.cap_per_cycle_usd * DELIBERATION_BUDGET_RATIO,
+    )
+
     try:
         surface_result = await surface_bottlenecks(
             umbra, observations,
             n=config.observations_top_n,
             blackboard=live_bb,
+            budget=deliberation_budget,
         )
     finally:
         progress_task.cancel()
@@ -328,6 +386,29 @@ async def run_cycle(
         patch_files_ref[0] = [(pf.path, pf.content) for pf in patch.files]
     except Exception:
         patch_files_ref[0] = []
+
+    # ── Self-healing v2.0 · fixation detector ─────────────────
+    # If the convocation is trying to write a file path that was
+    # touched by one of the last few commits, reject early as a skip.
+    # The daemon's outer loop will detect "fixation_break" in the
+    # reason and immediately retry with a fresh observation set
+    # (60-second fast retry, not the full 20-min interval).
+    proposed = {pf.path for pf in patch.files}
+    recent = _recently_shipped_paths(config.repo_root)
+    fixated = proposed & recent
+    if fixated:
+        config.ledger.record_cycle(cost_usd=cycle_cost)
+        return CycleResult(event=await finalize(make_event(
+            status="skipped",
+            reason=(
+                "fixation_break · convocation re-proposed recently shipped "
+                f"files: {sorted(fixated)[:3]}"
+            ),
+            observations_count=len(observations),
+            verdict_summary=patch.summary,
+            files_changed=[],
+            cost_usd=cycle_cost,
+        )))
 
     # ── 4. Apply patch to disk (with policy enforcement) ───────
     apply_result: ApplyResult = apply_patch(

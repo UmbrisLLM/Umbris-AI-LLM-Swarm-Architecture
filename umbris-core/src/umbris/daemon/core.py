@@ -186,6 +186,20 @@ class Daemon:
         self._persist_status()
 
         exit_code = 0
+        # ─── Self-healing loop state ──────────────────────────────
+        # `consecutive_recoverable_skips` counts how many recent
+        # cycles ended in a state we consider safely retryable (cost
+        # cap reached, parser fail, fixation break, budget exhausted).
+        # When > 0, the next sleep is the FAST_RETRY_SECONDS instead
+        # of the full interval · the daemon restarts the cycle
+        # immediately. After MAX_FAST_RETRIES in a row, the daemon
+        # falls back to a long cool-down so we never burn through the
+        # daily cost cap on a stuck pattern.
+        consecutive_recoverable_skips = 0
+        FAST_RETRY_SECONDS = 60
+        MAX_FAST_RETRIES = 3
+        COOLDOWN_SECONDS = max(self._interval_seconds * 3, 3600)
+
         try:
             cycle_n = 0
             while not self._stop_requested:
@@ -211,7 +225,42 @@ class Daemon:
                 if self._stop_requested:
                     break
 
-                await self._interruptible_sleep(self._interval_seconds)
+                # ─── Decide how long to sleep before the next cycle ───
+                # Default: full interval. But if the cycle ended in a
+                # recoverable failure mode, restart fast.
+                next_sleep = self._interval_seconds
+                if self._is_recoverable_skip(result):
+                    consecutive_recoverable_skips += 1
+                    if consecutive_recoverable_skips <= MAX_FAST_RETRIES:
+                        next_sleep = FAST_RETRY_SECONDS
+                        self.log.info(
+                            "custos.fast_retry_scheduled",
+                            cycle=cycle_n,
+                            reason=result.event.reason,
+                            consecutive=consecutive_recoverable_skips,
+                            sleep_seconds=next_sleep,
+                        )
+                    else:
+                        # We've fast-retried the cap. Force a long
+                        # cool-down so we don't burn through the
+                        # daily budget on a stuck pattern.
+                        next_sleep = COOLDOWN_SECONDS
+                        consecutive_recoverable_skips = 0
+                        self.log.warning(
+                            "custos.cooldown_engaged",
+                            cycle=cycle_n,
+                            reason=(
+                                "max fast retries reached; "
+                                "entering cool-down"
+                            ),
+                            sleep_seconds=next_sleep,
+                        )
+                else:
+                    # Any success or non-recoverable failure resets
+                    # the counter.
+                    consecutive_recoverable_skips = 0
+
+                await self._interruptible_sleep(next_sleep)
         except Exception as e:  # noqa: BLE001 · top-level safety net
             self.log.exception("custos.crashed", error=str(e))
             exit_code = 2
@@ -260,6 +309,38 @@ class Daemon:
             cycle_number=cycle_n,
         )
         return await run_cycle(llm=self.llm, config=config)
+
+    def _is_recoverable_skip(self, result: CycleResult) -> bool:
+        """Detect cycles that ended in a state where an immediate fresh
+        retry is the right next move · instead of waiting the full
+        interval. Cost-cap halts, parser fails, fixation breaks and
+        budget-exhausted signals are all recoverable · the underlying
+        problem (verdict didn't survive the safety gates) gets a clean
+        new try with a fresh observation set in 60 seconds rather than
+        20 minutes.
+
+        Hard failures (git push rejected, test gate failed on real
+        code regressions, build gate failed because the host is
+        misconfigured) are NOT recoverable · waiting the full interval
+        gives the operator time to intervene."""
+        status = result.event.status
+        reason = (result.event.reason or "").lower()
+
+        # A successful cycle is never a skip.
+        if status == "ok":
+            return False
+
+        # Specific reason patterns we know are safe to immediately retry.
+        recoverable_markers = (
+            "cost-cap",
+            "cost cap",
+            "patcher response failed",
+            "parser response failed",
+            "fixation_break",
+            "budget exhausted",
+            "no observations surfaced",
+        )
+        return any(marker in reason for marker in recoverable_markers)
 
     async def _interruptible_sleep(self, seconds: int) -> None:
         """Sleep that returns early if a stop is requested."""
