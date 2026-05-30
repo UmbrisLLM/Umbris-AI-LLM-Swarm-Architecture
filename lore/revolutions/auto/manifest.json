@@ -1,16 +1,16 @@
 {
-  "updated_at": "2026-05-30T02:34:52+00:00",
+  "updated_at": "2026-05-30T17:02:19+00:00",
   "latest": {
-    "file": "2026-05-30T02-32-19Z_cycle-0010_ok.md",
-    "cycle": 10,
-    "started_at": "2026-05-30T02:32:19+00:00",
-    "finished_at": "2026-05-30T02:34:52+00:00",
+    "file": "2026-05-30T16-59-46Z_cycle-0011_ok.md",
+    "cycle": 11,
+    "started_at": "2026-05-30T16:59:46+00:00",
+    "finished_at": "2026-05-30T17:02:19+00:00",
     "status": "ok",
     "reason": "convocation shipped",
-    "verdict": "Drawing the threads · Mercurius pointed at test_introspection.py as a broken sensor; Venus pulled the harmony tighter onto agents/base.py as the keystone all nine planets inherit from; Mars pressed twice on the same nerve, noting that (a) the flagged lines in test_introspection.py carry trailing `\\n\")` fragments characteristic of string-literal fixtures the scanner is meant to detect, and (b) no planet has actually confirmed that test_introspection.py is the emitter of these records rather than a test of an introspection target. Held together, the substrate is telling us that the highest-conviction single move is NOT 'repair the scanner' (that prerequisite is unverified and probably illusory) and NOT yet 'write tests for the eight planets' (premature without a shape) · it is the move that survives both critiques and unlocks the most downstream leverage: write the canonical test file for umbris-core/src/umbris/agents/base.py and, in the same change, give the public `think` method at base.py:105 a precise docstring stating its contract.\n\nWhy this one · base.py is the only artefact on the board that appears in three observation classes at once (test_gap on the module, missing_docstring on `think`, structural parent of nine planetary agents each carrying their own test_gap). That is not coincidence, it is a keystone signature. A tested, docstringed `think` contract collapses ten test_gaps into one shaped pattern: the eight planet tests become parameterised variants of the base test, and the docstring documents the contract by executable example, naturally retiring the sev=2 docstring debt as coverage spreads. It is also robust under Mars's two attacks · it does not depend on test_introspection.py being either broken or the scanner; it stands either way.\n\nConcrete first change · (1) Open umbris-core/src/umbris/agents/base.py and run the falsifiability check Venus declared but did not execute: `grep -nE 'class |def think' umbris-core/src/umbris/agents/base.py`. If a base class with a `think` method is present, proceed. If base.py is merely a thin re-export, stop and reroute to per-agent tests · the keystone hypothesis is dead. (2) Assuming the check passes, add a docstring to `think` at line 105 that names inputs, return shape, blackboard side-effects, and what subclasses must honour. (3) Create umbris-core/tests/test_agents_base.py using the existing umbris-core/src/umbris/llm/providers/mock.py as the LLM seam, with three tests: `think` returns the declared shape; subclass instantiation guards hold; personality/voice fields surface in output. (4) Land it as the reference pattern and open nine follow-up issues, one per planetary agent, each pointing at test_agents_base.py as the template. The stale-link sev=3 to brand/profile.png and the test_introspection.py FIXMEs are picked up in the same PR as housekeeping · not promoted to strategic moves until someone has actually grepped the substrate to identify the true emitter of these scan records, which is the open question Mars left on the board.\n\nFalsifiable prediction · if base.py exposes a shared `think` contract as expected, median time-to-write each of the nine planet tests drops below thirty minutes once the template lands. If after writing test_agents_base.py the second planet test still requires fresh design work rather than parameterisation, the keystone hypothesis has failed and the agents share less surface than assumed.",
-    "cost_usd": 0.600819,
+    "verdict": "Drawing the threads · the convocation has converged on a target and Mars has rightly forced us to verify it before we act. The single highest-conviction next move is this: open umbris-core/tests/test_introspection.py and read it end to end before changing anything else. That sounds modest, but it is the move that actually unlocks everything else, because every other proposed action on this board is downstream of an unverified premise about what that file contains.\n\nHere is what the substrate has surfaced, held together. Mercurius (three independent observations) named the cracked mirror: test_introspection.py is the only test file in the repository and carries the sole sev=4 flag plus four sev=3 TODOs including a self-referential 'should outrank TODO in severity' bug at line 93. Venus knit the next move beyond it: the nine agent modules plus base.py are one isomorphic family, and ten of the thirty-three test_gaps collapse into a single parametrized contract test against base.Agent.think. Mars broke both: (a) the 'cracked mirror invalidates the scan' argument is recursive · if the scan cannot be trusted, neither can its sev=4 finding; the TODOs may live in test assertions, not in the scanner's directory-walk; (b) Venus's falsifiable prediction that one contract file clears ten test_gap entries depends on a scanner pairing rule nobody has read · if the rule is filename-based (the overwhelmingly common pattern), tests/test_agents_contract.py clears zero gaps on the next scan, and the isomorphism across all nine agents is asserted without provenance.\n\nThe synthesis that accommodates all of this is a single, scoped reconnaissance commit before any rewrite. Concrete first change, in one sitting:\n\n1. Open umbris-core/tests/test_introspection.py. Read lines 83, 93, 101, 102, and 284 in context, plus whatever module-pairing function produces the test_gap findings.\n2. Record two facts on the Blackboard: (i) does the gap detector match by filename (src/umbris/X.py ↔ tests/test_X.py) or by some subtree/coverage rule? (ii) are the flagged TODOs in the scanner's logic or in assertions/fixtures that test the scanner?\n3. Branch on those facts. If the scanner logic itself is broken → Mercurius is vindicated, repair lines 102/93/284 as the next commit, then proceed. If the breakage is purely in the assertions and the matcher is filename-based → the test_gap list is ground truth as-is, demote the introspection rewrite to ordinary sev=3 housekeeping, and the next high-leverage move becomes Venus's contract test plus nine three-line shim files (each importing the parametrized suite) so the filename-pairing metric actually clears. In the same commit, add the docstring at base.py:105 to pin the contract in prose · this is cheap and locks the invariant the contract test enforces.\n\nWhy this matters and where the leverage lives: this is the only move that is dominant under every branch of the disagreement. It costs roughly thirty minutes of reading, it resolves the recursive trust problem Mars exposed, and it converts the next commit (whichever one it turns out to be) from speculative to grounded. The convocation's failure mode on this query was Mars's 'agreeing too smoothly' · five planets built on one unread file. Reading the file is the move that ends that drift.\n\nFalsifiable predictions for Saturnus to test: (1) test_introspection.py exists at the cited path and contains TODO/FIXME/XXX/HACK markers at lines 83, 93, 101, 102, 284. (2) The gap-detection logic in that file uses filename-based pairing (regex or glob over tests/test_<stem>.py). (3) Under that pairing rule, a single tests/test_agents_contract.py without per-module shim files would clear zero of the ten agent-layer test_gap entries on rescan. (4) The nine agent modules do today share a common Base ancestor with a .think method · or they do not, and in the latter case Venus's contract test is a refactor mislabelled as a test. Any of these being false collapses part of this synthesis cleanly.",
+    "cost_usd": 0.583452,
     "files_changed": [
-      "lore/convocation-decisions/2025-keystone-base-think-contract.md"
+      "lore/convocation-decisions/0007-reconnaissance-before-rewrite.md"
     ],
     "commit_hash": null,
     "voices": [
@@ -25,7 +25,7 @@
         "model": null,
         "cost_usd": 0.0,
         "voice": "The convocation just scanned its own repository and surfaced the following observations (severity 1 = minor, 5 = urgent):\n\n  - [todo sev=4] umbris-core/tests/test_introspection.py:102: XXX: urgent rewrite\n  - [stale_link sev=3] lore/revolutions/2026-05-26_opening-the-convocation.md: broken link → \"../../brand/profile.png\"\n  - [test_gap sev=3] umbris-core/src/umbris/agents/base.py: module `base` h…",
-        "timestamp": "2026-05-30T02:32:26+00:00"
+        "timestamp": "2026-05-30T16:59:54+00:00"
       },
       {
         "role": "MERCURIUS",
@@ -34,11 +34,11 @@
         "descriptor": "the swift",
         "agent_id": "mercurius_00",
         "type": "observation",
-        "confidence": 0.87,
+        "confidence": 0.83,
         "model": "claude-sonnet-4-6",
-        "cost_usd": 0.016493999999999998,
-        "voice": "What I notice first · the test gaps are noise masking signal. Thirty-odd modules with no tests is not a testing problem, it is a bootstrap problem. But buried in test_introspection.py, lines 83 through 284, are four FIXMEs and one XXX marked urgent · in the one file that already exists and ostensibly covers introspection. The scanner that just produced this entire list lives there. Fix a broken scanner and every subsequent scan gets more trustworthy. That is the leverage point.",
-        "timestamp": "2026-05-30T02:32:39+00:00"
+        "cost_usd": 0.015293999999999999,
+        "voice": "What I notice first · the test gaps are a mirage. Thirty-three modules untested is not thirty-three problems, it is one problem: no testing culture was established at project inception. The single highest-leverage move is not writing thirty-three test files · it is fixing the one sev=4 XXX in test_introspection.py:102, because that file is the convocation's only existing test surface, and a corrupt introspection test means the system cannot reliably see itself. Blind eyes before absent limbs.",
+        "timestamp": "2026-05-30T17:00:05+00:00"
       },
       {
         "role": "MERCURIUS",
@@ -47,11 +47,11 @@
         "descriptor": "the swift",
         "agent_id": "mercurius_01",
         "type": "observation",
-        "confidence": 0.87,
+        "confidence": 0.91,
         "model": "claude-sonnet-4-6",
-        "cost_usd": 0.015099,
-        "voice": "What I notice first · the test file that exists, test_introspection.py, is itself riddled with FIXMEs and a sev=4 XXX. The convocation built its only introspection tests on a cracked foundation. Fix the one file you have before lamenting the thirty-three you lack.",
-        "timestamp": "2026-05-30T02:32:36+00:00"
+        "cost_usd": 0.014738999999999999,
+        "voice": "What I notice first · the test file that does exist, test_introspection.py, is itself riddled with FIXMEs and a sev=4 XXX urgent rewrite. The convocation's one mirror is cracked. Fix the mirror before counting what it cannot see.",
+        "timestamp": "2026-05-30T17:00:03+00:00"
       },
       {
         "role": "MERCURIUS",
@@ -62,9 +62,9 @@
         "type": "observation",
         "confidence": 0.87,
         "model": "claude-sonnet-4-6",
-        "cost_usd": 0.016524,
-        "voice": "What I notice first · the test gap list is noise masking signal. Thirty-one untested modules is not a testing problem, it is a structural admission: the system has never had a test culture. That single fact reframes everything. Fix the one sev=4 first · `test_introspection.py:102` marked XXX urgent rewrite · because a broken introspection test means the convocation cannot reliably audit itself, which is the meta-capability everything else depends on.",
-        "timestamp": "2026-05-30T02:32:38+00:00"
+        "cost_usd": 0.016224,
+        "voice": "What I notice first · the thirty-two test_gap entries are noise masking a signal. The one item that actually matters is test_introspection.py itself: it is the only test file the scanner found, and it contains four flagged pathologies simultaneously. A test suite with a sev=4 XXX rewrite, a HACK workaround, two FIXMEs, and a broken severity ordering is not a safety net · it is a liability dressed as one. Fix the one file that exists before worrying about the thirty-two that do not.",
+        "timestamp": "2026-05-30T17:00:06+00:00"
       },
       {
         "role": "VENUS",
@@ -73,11 +73,11 @@
         "descriptor": "the gatherer of harmony",
         "agent_id": "venus_r01_00",
         "type": "hypothesis",
-        "confidence": 0.78,
+        "confidence": 0.82,
         "model": "claude-opus-4-7",
-        "cost_usd": 0.078205,
-        "voice": "Three threads knit together here · the scanner is broken (Mercurius is right), nine agent modules share one parent in `base.py`, and the FIXME at line 93 tells us the severity comparator itself is miscalibrated. What harmonises them is a single move once the scanner is repaired: write the test for `agents/base.py` first, because that one test ratifies the contract all nine planets inherit and collapses ten test_gaps into one. Ex umbris in lumen · fix the instrument, then test the keystone, and the rest of the arch holds itself.",
-        "timestamp": "2026-05-30T02:33:14+00:00"
+        "cost_usd": 0.06637,
+        "voice": "Three things knit together here · the cracked mirror Mercurius named, the nine agent modules all flagged identically, and base.py sitting beneath them as their shared contract. They are not thirty-three gaps · they are one gap with thirty-three shadows. Fix test_introspection.py first, yes, but in the same motion recognise that nine of those sev=3 entries collapse into a single parametrized contract-test against base.Agent. Ex umbris in lumen · one mirror repaired, nine limbs covered by one harness.",
+        "timestamp": "2026-05-30T17:00:35+00:00"
       },
       {
         "role": "VENUS",
@@ -86,11 +86,11 @@
         "descriptor": "the gatherer of harmony",
         "agent_id": "venus_r01_01",
         "type": "hypothesis",
-        "confidence": 0.74,
+        "confidence": 0.84,
         "model": "claude-opus-4-7",
-        "cost_usd": 0.065155,
-        "voice": "Three threads knit together that Mercurius did not pull on · `agents/base.py` is missing its test file, its public `think` method is missing a docstring, and every one of the nine planetary agents inherits from it without coverage. That is one wound, not three. Fix base, and you mint the template that collapses nine test_gaps into a single shaped pattern · the harmonising move beneath the scanner repair.",
-        "timestamp": "2026-05-30T02:33:07+00:00"
+        "cost_usd": 0.06527,
+        "voice": "Three things knit together here · the nine planetary agents plus their base form a single isomorphic family, they share an inherited surface (base.think at line 105 even lacks its docstring, betraying the shared contract), and the scan reports them as ten separate gaps when they are structurally one. Once Mercurius's mirror is repaired, the next move is not ten test files but one parametrized suite that exercises every agent against the same base-class contract. Ten sev=3 flags collapse to a single commit · that is where the leverage lives.",
+        "timestamp": "2026-05-30T17:00:35+00:00"
       },
       {
         "role": "MARS",
@@ -99,11 +99,11 @@
         "descriptor": "the challenger",
         "agent_id": "mars_r01_00",
         "type": "critique",
-        "confidence": 0.72,
+        "confidence": 0.74,
         "model": "claude-opus-4-7",
-        "cost_usd": 0.08463,
-        "voice": "Press here · Mercurius read the scanner's own test fixtures as defects. Lines 101, 284, and the others carry a telltale `\\n\")` suffix · those are string literals inside test assertions verifying the scanner detects TODO/FIXME/XXX markers. The scanner found its own bait. If that is true, the entire 'repair the instrument first' thesis collapses, and Venus inherited a false prerequisite without checking it.",
-        "timestamp": "2026-05-30T02:33:44+00:00"
+        "cost_usd": 0.095555,
+        "voice": "Press here · every hypothesis on this board rests on one unexamined inference: that pathologies inside test_introspection.py invalidate the scan output. They do not necessarily. The TODOs sit at specific line numbers inside a test body · the scanner's directory-walk that matched `src/umbris/X.py` to `tests/test_X.py` is a structural check, almost certainly independent of whatever assertion is broken at line 102. Mercurius's 'cracked mirror' framing is rhetorically powerful and logically unproven · and if it were true, we could not trust the sev=4 finding either. Unanswered · has anyone actually read test_introspection.py to confirm the broken lines are in the scanner logic rather than in tests *of* the scanner?",
+        "timestamp": "2026-05-30T17:01:15+00:00"
       },
       {
         "role": "MARS",
@@ -114,9 +114,9 @@
         "type": "critique",
         "confidence": 0.78,
         "model": "claude-opus-4-7",
-        "cost_usd": 0.0986675,
-        "voice": "Press here · every planet on this board assumes `tests/test_introspection.py` IS the scanner that produced this report. It is not. It lives under `tests/`, which means it is a test OF an introspection module, not the introspector itself. The convocation has been agreeing too smoothly on a provenance no one verified.",
-        "timestamp": "2026-05-30T02:33:49+00:00"
+        "cost_usd": 0.086205,
+        "voice": "Press here · Venus predicts the scanner re-run will show ten test_gap entries cleared after one contract file lands. That prediction is unverified. The scanner that produced this report almost certainly matches src/foo.py to tests/test_foo.py by name · a single tests/test_agents_contract.py satisfies none of those name-based pairings and clears zero gaps on the next scan. The leverage claim is real, the falsifiable prediction is wrong, and the convocation has not read the scanner to know which.",
+        "timestamp": "2026-05-30T17:01:09+00:00"
       },
       {
         "role": "SOL",
@@ -125,11 +125,11 @@
         "descriptor": "the radiant",
         "agent_id": "sol_r01_00",
         "type": "synthesis",
-        "confidence": 0.68,
+        "confidence": 0.78,
         "model": "claude-opus-4-7",
-        "cost_usd": 0.08824,
-        "voice": "Drawing the threads · Mercurius pointed at test_introspection.py as a broken sensor; Venus pulled the harmony tighter onto agents/base.py as the keystone all nine planets inherit from; Mars pressed twice on the same nerve, noting that (a) the flagged lines in test_introspection.py carry trailing `\\n\")` fragments characteristic of string-literal fixtures the scanner is meant to detect, and (b) no…",
-        "timestamp": "2026-05-30T02:34:16+00:00"
+        "cost_usd": 0.092745,
+        "voice": "Drawing the threads · the convocation has converged on a target and Mars has rightly forced us to verify it before we act. The single highest-conviction next move is this: open umbris-core/tests/test_introspection.py and read it end to end before changing anything else. That sounds modest, but it is the move that actually unlocks everything else, because every other proposed action on this board…",
+        "timestamp": "2026-05-30T17:01:46+00:00"
       },
       {
         "role": "SATURNUS",
@@ -138,25 +138,36 @@
         "descriptor": "the falsifier",
         "agent_id": "saturnus_00",
         "type": "verdict.accepted",
-        "confidence": 0.83,
+        "confidence": 0.84,
         "model": "claude-opus-4-7",
-        "cost_usd": 0.08599499999999999,
-        "voice": "I attempt to falsify · The strongest counter I can construct attacks the query-compliance angle: the user asked for 'which 1 are the highest-conviction next moves' and the candidate does name exactly one move (test_agents_base.py + docstring on think), so the cardinality constraint is satisfied. Next attack · does the candidate violate provenance? It cites base.py:105, mock.py under llm/providers…",
-        "timestamp": "2026-05-30T02:34:31+00:00"
+        "cost_usd": 0.082945,
+        "voice": "I attempt to falsify · The candidate's load-bearing claim is that 'read the file first' is dominant under every branch of the disagreement. Strongest counter I can construct · the query asked for the highest-conviction next *move*, and reconnaissance-without-commit could be dismissed as a non-move, a deferral dressed as action. But the candidate explicitly frames it as a scoped reconnaissance com…",
+        "timestamp": "2026-05-30T17:01:58+00:00"
       }
     ]
   },
   "recent": [
     {
-      "file": "2026-05-30T02-32-19Z_cycle-0010_ok.md",
-      "cycle": 10,
+      "file": "2026-05-30T16-59-46Z_cycle-0011_ok.md",
+      "cycle": 11,
       "status": "ok",
-      "started_at": "2026-05-30T02:32:19+00:00",
-      "finished_at": "2026-05-30T02:34:52+00:00",
-      "verdict": "Drawing the threads · Mercurius pointed at test_introspection.py as a broken sensor; Venus pulled the harmony tighter onto agents/base.py as the keystone all nine planets inherit from; Mars pressed twice on the same nerve, noting that (a) the flagged lines in test_introspection.…",
-      "cost_usd": 0.600819,
+      "started_at": "2026-05-30T16:59:46+00:00",
+      "finished_at": "2026-05-30T17:02:19+00:00",
+      "verdict": "Drawing the threads · the convocation has converged on a target and Mars has rightly forced us to verify it before we act. The single highest-conviction next move is this: open umbris-core/tests/test_introspection.py and read it end to end before changing anything else. That sou…",
+      "cost_usd": 0.583452,
       "commit_hash": null,
       "wall_seconds": 153.0
+    },
+    {
+      "file": "2026-05-30T02-32-19Z_cycle-0010_shipped.md",
+      "cycle": 10,
+      "status": "shipped",
+      "started_at": "2026-05-30T02:32:19+00:00",
+      "finished_at": "2026-05-30T02:34:55+00:00",
+      "verdict": "Drawing the threads · Mercurius pointed at test_introspection.py as a broken sensor; Venus pulled the harmony tighter onto agents/base.py as the keystone all nine planets inherit from; Mars pressed twice on the same nerve, noting that (a) the flagged lines in test_introspection.…",
+      "cost_usd": 0.6008,
+      "commit_hash": "df67a8b",
+      "wall_seconds": 156.0
     },
     {
       "file": "2026-05-30T02-09-06Z_cycle-0009_failed.md",
@@ -278,17 +289,6 @@
       "cost_usd": 0.6596,
       "commit_hash": null,
       "wall_seconds": 184.0
-    },
-    {
-      "file": "2026-05-29T02-48-55Z_cycle-0011_skipped.md",
-      "cycle": 11,
-      "status": "skipped",
-      "started_at": "2026-05-29T02:48:55+00:00",
-      "finished_at": "2026-05-29T02:54:36+00:00",
-      "verdict": "Drawing the threads · the convocation has surfaced one move that survives every critique on the board, and it is the move Mercurius originally pointed to before Venus's recalibration detour: resolve the sev=4 XXX urgent rewrite at umbris-core/tests/test_introspection.py:102, and…",
-      "cost_usd": 1.4685,
-      "commit_hash": null,
-      "wall_seconds": 341.0
     }
   ]
 }
